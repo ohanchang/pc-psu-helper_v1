@@ -72,16 +72,19 @@
                 </div>
 
                 <!-- 語系與操作區 -->
-                <div class="flex flex-col items-end gap-3">
-                    <!-- 語系切換器 -->
-                    <div class="flex bg-zinc-800 p-1 rounded-lg">
-                        <button onclick="changeLang('tw')" id="lang-tw" class="px-3 py-1 text-xs font-bold rounded transition-all bg-zinc-700 text-zinc-100 shadow-sm">TW</button>
-                        <button onclick="changeLang('en')" id="lang-en" class="px-3 py-1 text-xs font-bold rounded transition-all text-zinc-500 hover:text-zinc-300">EN</button>
+                <div class="flex flex-col items-end gap-3 z-10 relative">
+                    <div class="flex items-center gap-3">
+                        <!-- 語系切換器 -->
+                        <div class="flex bg-zinc-800 p-1 rounded-lg">
+                            <button onclick="changeLang('tw')" id="lang-tw" class="px-3 py-1 text-xs font-bold rounded transition-all bg-zinc-700 text-zinc-100 shadow-sm">TW</button>
+                            <button onclick="changeLang('en')" id="lang-en" class="px-3 py-1 text-xs font-bold rounded transition-all text-zinc-500 hover:text-zinc-300">EN</button>
+                        </div>
+                        
+                        <!-- 重新選取按鈕 (暗黑警示樣式) -->
+                        <button id="reset-btn" class="hidden px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/20 transition-all flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> <span id="ui-reset">重新選取</span>
+                        </button>
                     </div>
-                    
-                    <button id="reset-btn" class="hidden px-5 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-semibold rounded-xl border border-zinc-700 transition-all flex items-center gap-2">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4 text-teal-500"></i> <span id="ui-reset">重新選取</span>
-                    </button>
                 </div>
             </div>
         </header>
@@ -466,8 +469,18 @@
             const resultCountBottom = document.getElementById('result-count-bottom');
             const count = filteredData.length;
             let filterCount = Object.keys(selectedFilters).length;
+            
+            // 控制右上角重置按鈕的顯示/隱藏
+            const resetBtn = document.getElementById('reset-btn');
+            if (filterCount > 0 || selectedWattageRange || selectedInputVoltage1) {
+                if (resetBtn) resetBtn.classList.remove('hidden');
+            } else {
+                if (resetBtn) resetBtn.classList.add('hidden');
+            }
+            
             if (selectedWattageRange && !selectedFilters['Wattage_W']) filterCount++;
             if (selectedInputVoltage1 && !selectedFilters['Input_Voltage_2']) filterCount++;
+            
             if (count > 51) { if (statusTextTop) statusTextTop.classList.add('hidden'); if (statusTextBottom) statusTextBottom.classList.add('hidden'); }
             else { if (statusTextTop) statusTextTop.classList.remove('hidden'); if (statusTextBottom) statusTextBottom.classList.remove('hidden'); if (resultCountTop) resultCountTop.innerText = count; if (resultCountBottom) resultCountBottom.innerText = count; }
             if (resultsArea) resultsArea.classList.add('hidden');

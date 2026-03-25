@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PC 電源供應器選購助手 | Tech Edition</title>
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 PapaParse -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- 引入 Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
@@ -51,7 +48,6 @@
 <body class="font-sans p-4 md:p-8 lg:p-12">
 
     <div class="max-w-5xl mx-auto">
-        <!-- 頂部 Header -->
         <header class="mb-10">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div class="flex-grow">
@@ -65,28 +61,26 @@
                     </div>
                 </div>
 
-                <!-- 語系切換與操作區 -->
                 <div class="flex flex-col items-end gap-3">
-                    <!-- 語言切換器 -->
-                    <div class="flex bg-white/5 border border-white/10 p-1 rounded-xl shadow-inner backdrop-blur-md">
-                        <button onclick="changeLang('tw')" id="lang-tw" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow-lg">TW</button>
-                        <button onclick="changeLang('en')" id="lang-en" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">EN</button>
+                    <div class="flex items-center gap-3">
+                        <div class="flex bg-white/5 border border-white/10 p-1 rounded-xl shadow-inner backdrop-blur-md">
+                            <button onclick="changeLang('tw')" id="lang-tw" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow-lg">TW</button>
+                            <button onclick="changeLang('en')" id="lang-en" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">EN</button>
+                        </div>
+                        
+                        <button id="reset-btn" class="px-4 py-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 text-xs font-bold rounded-xl border border-red-500/30 transition-all flex items-center gap-1.5 shadow-lg">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> <span id="ui-reset">重新選取</span>
+                        </button>
                     </div>
-
-                    <button id="reset-btn" class="hidden px-5 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 text-sm font-semibold rounded-xl border border-white/10 transition-all flex items-center gap-2">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4 text-blue-400"></i> <span id="ui-reset">重新選取</span>
-                    </button>
                 </div>
             </div>
         </header>
 
-        <!-- 篩選器容器 (Glassmorphism) -->
         <div id="filters-container" class="glass-panel rounded-3xl shadow-2xl p-6 md:p-10 mb-8 min-h-[150px] relative">
             <div id="loading-msg" class="absolute inset-0 flex items-center justify-center text-blue-400 animate-pulse font-medium">
                 <i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i> <span id="ui-loading">正在載入雲端資料庫...</span>
             </div>
-            <!-- 動態生成的篩選器 -->
-        </div>
+            </div>
 
         <div class="flex flex-col md:flex-row justify-between items-center mb-10 min-h-[40px] gap-4">
             <div id="status-text-bottom" class="text-sm font-medium text-slate-400 hidden">
@@ -97,10 +91,8 @@
             </button>
         </div>
 
-        <!-- 結果顯示區 -->
         <div id="results-area" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
-            <!-- 卡片由 JS 動態生成 -->
-        </div>
+            </div>
     </div>
 
     <script>
@@ -112,7 +104,7 @@
                 title: "PC 電源供應器選購助手",
                 desc: "點擊類別展開選項，系統將為您即時篩選合適的電源。",
                 loading: "正在載入雲端資料庫...",
-                reset: "重新選取設定",
+                reset: "重新選取",
                 statusLabelTop: "目前符合條件：",
                 unitTop: "款",
                 statusLabelBottom: "為您篩選出",
@@ -137,6 +129,8 @@
                 label_voltage: "輸入電壓",
                 label_altitude: "工作海拔",
                 label_temp: "工作溫度",
+                label_dimensions: "產品尺寸 (L*W*H)",
+                cp_badge: "C/P 首選",
                 val_none: "無",
                 val_unit_ports: "組"
             },
@@ -169,6 +163,8 @@
                 label_voltage: "Voltage",
                 label_altitude: "Altitude",
                 label_temp: "Temp",
+                label_dimensions: "Dimensions (L*W*H)",
+                cp_badge: "Best C/P",
                 val_none: "None",
                 val_unit_ports: " Port(s)"
             }
@@ -213,6 +209,7 @@
                 renderResults(); 
             });
 
+            // 重新選取邏輯
             document.getElementById('reset-btn').addEventListener('click', () => {
                 selectedFilters = {};
                 expandedCategories = new Set();
@@ -613,6 +610,15 @@
             }
         }
 
+        function getFormFactorClass(type) {
+            if (!type) return 'bg-white/10 text-slate-300 border-white/5';
+            const t = type.toUpperCase();
+            if (t.includes('ATX')) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+            if (t.includes('SFX')) return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+            if (t.includes('TFX')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+            return 'bg-white/10 text-slate-300 border-white/5';
+        }
+
         function renderResults() {
             const container = document.getElementById('results-area');
             if (!container) return;
@@ -640,11 +646,13 @@
                 card.className = `relative rounded-3xl p-6 flex flex-col h-full overflow-hidden ${baseClass} ${borderClass}`;
                 
                 let ribbonHTML = isHighCP ? `<div class="absolute top-0 right-0"><div class="bg-blue-600 text-white text-[10px] font-black px-4 py-1.5 rounded-bl-2xl shadow-lg flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="award" class="w-3.5 h-3.5"></i> ${lang.cp_badge}</div></div>` : '';
+                
+                const ffClass = getFormFactorClass(item.Form_Factor);
 
                 card.innerHTML = `
                     ${ribbonHTML}
                     <div class="mb-5 pr-20">
-                        <div class="inline-block px-2.5 py-1 bg-white/10 text-blue-300 text-[10px] font-bold tracking-wider rounded-lg border border-white/5 uppercase mb-3">
+                        <div class="inline-block px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-lg border uppercase mb-3 ${ffClass}">
                             ${item.Form_Factor || 'UNK'}
                         </div>
                         <h3 class="text-xl font-bold text-white leading-tight mb-1">${item.Model_Name}</h3>
@@ -653,12 +661,12 @@
                     
                     <div class="flex items-center justify-between mb-6 pb-6 border-b border-white/5">
                         <div class="flex items-baseline">
-                            <span class="text-5xl font-black text-white tracking-tighter">${item.Wattage_W}</span>
+                            <span class="text-5xl font-black text-white tracking-tighter drop-shadow-md">${item.Wattage_W}</span>
                             <span class="text-blue-400 font-bold text-xl ml-1">W</span>
                         </div>
                         <div class="text-right flex flex-col items-end">
                             <div class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">${lang.label_efficiency}</div>
-                            <div class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-lg font-black text-xs border border-blue-500/30 tracking-wide">
+                            <div class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-lg font-black text-xs border border-blue-500/30 tracking-wide drop-shadow-md">
                                 ${item.Efficiency_Level || '-'}
                             </div>
                         </div>
