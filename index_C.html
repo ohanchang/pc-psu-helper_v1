@@ -16,9 +16,10 @@
             /* 科技感深色漸層背景 */
             background: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 40%, #020617 100%);
             color: #e2e8f0;
+            min-height: 100vh;
         }
         
-        /* 玻璃擬態 (Glassmorphism) 共用類別 */
+        /* 玻璃擬態 (Glassmorphism) */
         .glass-panel {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(12px);
@@ -41,66 +42,139 @@
         }
         
         /* 自訂暗色系捲軸 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2); 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1); 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2); 
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
     </style>
 </head>
-<body class="font-sans min-h-screen p-4 md:p-8">
+<body class="font-sans p-4 md:p-8 lg:p-12">
 
     <div class="max-w-5xl mx-auto">
-        <header class="mb-10 text-center md:text-left">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 mb-2 tracking-tight">
+        <!-- 頂部 Header -->
+        <header class="mb-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="flex-grow">
+                    <h1 id="ui-title" class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 mb-2 tracking-tight">
                         PC 電源供應器選購助手
                     </h1>
-                    <p class="text-slate-400">點擊類別展開選項，系統將為您即時篩選合適的電源。</p>
+                    <p id="ui-desc" class="text-slate-400">點擊類別展開選項，系統將為您即時篩選合適的電源。</p>
                     
                     <div id="status-text-top" class="text-sm font-medium text-blue-200 mt-3 hidden px-4 py-1.5 rounded-full bg-blue-900/30 border border-blue-500/30 inline-block shadow-[0_0_10px_rgba(59,130,246,0.2)]">
-                        目前符合條件：<span id="result-count-top" class="font-bold text-lg text-white ml-1">0</span> 款
+                        <span id="ui-status-label-top">目前符合條件：</span><span id="result-count-top" class="font-bold text-lg text-white ml-1">0</span> <span id="ui-unit-top">款</span>
                     </div>
                 </div>
-                <button id="reset-btn" class="hidden px-5 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 text-sm font-semibold rounded-xl border border-white/10 transition-all flex items-center gap-2">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 重新選取
-                </button>
+
+                <!-- 語系切換與操作區 -->
+                <div class="flex flex-col items-end gap-3">
+                    <!-- 語言切換器 -->
+                    <div class="flex bg-white/5 border border-white/10 p-1 rounded-xl shadow-inner backdrop-blur-md">
+                        <button onclick="changeLang('tw')" id="lang-tw" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow-lg">TW</button>
+                        <button onclick="changeLang('en')" id="lang-en" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">EN</button>
+                    </div>
+
+                    <button id="reset-btn" class="hidden px-5 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 text-sm font-semibold rounded-xl border border-white/10 transition-all flex items-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 text-blue-400"></i> <span id="ui-reset">重新選取</span>
+                    </button>
+                </div>
             </div>
         </header>
 
         <!-- 篩選器容器 (Glassmorphism) -->
-        <div id="filters-container" class="glass-panel rounded-2xl shadow-2xl p-6 md:p-8 mb-8 min-h-[150px] relative">
+        <div id="filters-container" class="glass-panel rounded-3xl shadow-2xl p-6 md:p-10 mb-8 min-h-[150px] relative">
             <div id="loading-msg" class="absolute inset-0 flex items-center justify-center text-blue-400 animate-pulse font-medium">
-                <i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i> 正在載入雲端資料庫...
+                <i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i> <span id="ui-loading">正在載入雲端資料庫...</span>
             </div>
-            <!-- 動態生成的篩選器框架會放在這 -->
+            <!-- 動態生成的篩選器 -->
         </div>
 
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 min-h-[40px] gap-4">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 min-h-[40px] gap-4">
             <div id="status-text-bottom" class="text-sm font-medium text-slate-400 hidden">
-                為您篩選出 <span id="result-count-bottom" class="text-blue-400 font-bold text-lg">0</span> 款電源
+                <span id="ui-status-label-bottom">為您篩選出</span> <span id="result-count-bottom" class="text-blue-400 font-bold text-lg">0</span> <span id="ui-unit-bottom">款電源</span>
             </div>
-            <button id="show-results-btn" class="hidden px-8 py-3 bg-blue-600/80 hover:bg-blue-500 text-white font-bold rounded-xl transition-all border border-blue-400/50 shadow-[0_0_15px_rgba(59,130,246,0.4)] ml-auto flex items-center gap-2">
-                <i data-lucide="zap" class="w-5 h-5"></i> 展開篩選結果
+            <button id="show-results-btn" class="hidden px-8 py-3 bg-blue-600/80 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all border border-blue-400/50 shadow-[0_0_15px_rgba(59,130,246,0.4)] ml-auto flex items-center gap-2">
+                <i data-lucide="zap" class="w-5 h-5"></i> <span id="ui-expand">展開篩選結果</span>
             </button>
         </div>
 
         <!-- 結果顯示區 -->
-        <div id="results-area" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
-            <!-- 卡片將由 JS 動態生成 -->
+        <div id="results-area" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
+            <!-- 卡片由 JS 動態生成 -->
         </div>
     </div>
 
     <script>
+        /**
+         * 語系字典 (i18n Dictionary)
+         */
+        const i18n = {
+            tw: {
+                title: "PC 電源供應器選購助手",
+                desc: "點擊類別展開選項，系統將為您即時篩選合適的電源。",
+                loading: "正在載入雲端資料庫...",
+                reset: "重新選取設定",
+                statusLabelTop: "目前符合條件：",
+                unitTop: "款",
+                statusLabelBottom: "為您篩選出",
+                unitBottom: "款電源",
+                expand: "展開篩選結果",
+                noResult: "查無符合條件的電源供應器",
+                // 類別標籤
+                cat_Form_Factor: "電源尺寸 (Form Factor)",
+                cat_ATX_Version: "ATX 規範版本",
+                cat_Wattage_W: "額定瓦數 (W)",
+                cat_Efficiency_Level: "效率等級 (80 PLUS)",
+                cat_Modular_Type: "線材設計",
+                cat_Input_Voltage_Group: "輸入電壓 (Input Voltage)",
+                cat_Operating_Altitude: "工作海拔",
+                cat_Working_Temp: "工作溫度",
+                cat_12V_2x6_Ports: "12V-2x6 接頭數",
+                cat_Price_Positioning: "系統精選機種",
+                // 卡片標籤
+                label_efficiency: "效率",
+                label_modular: "線材",
+                label_ports: "12V-2x6",
+                label_voltage: "輸入電壓",
+                label_altitude: "工作海拔",
+                label_temp: "工作溫度",
+                val_none: "無",
+                val_unit_ports: "組"
+            },
+            en: {
+                title: "PC PSU Selector",
+                desc: "Select categories to filter the perfect power supply for your system.",
+                loading: "Syncing database...",
+                reset: "Reset Filters",
+                statusLabelTop: "Matched: ",
+                unitTop: " Units",
+                statusLabelBottom: "Found ",
+                unitBottom: " compatible PSUs",
+                expand: "View Results",
+                noResult: "No matching power supplies found.",
+                // Category Labels
+                cat_Form_Factor: "Form Factor",
+                cat_ATX_Version: "ATX Version",
+                cat_Wattage_W: "Wattage (W)",
+                cat_Efficiency_Level: "Efficiency (80 PLUS)",
+                cat_Modular_Type: "Modular Design",
+                cat_Input_Voltage_Group: "Input Voltage",
+                cat_Operating_Altitude: "Altitude",
+                cat_Working_Temp: "Working Temp",
+                cat_12V_2x6_Ports: "12V-2x6 Ports",
+                cat_Price_Positioning: "High C/P Units",
+                // Card Labels
+                label_efficiency: "Efficiency",
+                label_modular: "Modular",
+                label_ports: "12V-2x6",
+                label_voltage: "Voltage",
+                label_altitude: "Altitude",
+                label_temp: "Temp",
+                val_none: "None",
+                val_unit_ports: " Port(s)"
+            }
+        };
+
+        let currentLang = 'tw';
         const DATA_SOURCE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZx7dFscS4QzuHlmZTJrYCqXTtSIf4vR-aqr4dIai7cTLfycA1MQA85Q09dj3jXUwwNCdwYn9nFNuL/pub?output=csv';
 
         let allData = [];            
@@ -117,16 +191,16 @@
         ];
 
         const CATEGORIES = [
-            { key: 'Form_Factor', label: '電源尺寸 (Form Factor)', icon: 'box' },
-            { key: 'ATX_Version', label: 'ATX 規範版本', icon: 'file-text' },
-            { key: 'Wattage_W', label: '額定瓦數 (W)', icon: 'battery-charging' },
-            { key: 'Efficiency_Level', label: '效率等級 (80 PLUS)', icon: 'award' },
-            { key: 'Modular_Type', label: '模組化設計', icon: 'cable' },
-            { key: 'Input_Voltage_Group', label: '輸入電壓 (Input Voltage)', type: 'group_2_levels', icon: 'plug' }, 
-            { key: 'Operating_Altitude', label: '工作海拔', icon: 'mountain' },
-            { key: 'Working_Temp', label: '工作溫度', icon: 'thermometer' },
-            { key: '12V_2x6_Ports', label: '12V-2x6 接頭數', icon: 'cpu' },
-            { key: 'Price_Positioning', label: '高性價比機種', type: 'toggle', toggleValue: 'V', icon: 'flame' } 
+            { key: 'Form_Factor', icon: 'box' },
+            { key: 'ATX_Version', icon: 'file-text' },
+            { key: 'Wattage_W', icon: 'battery-charging' },
+            { key: 'Efficiency_Level', icon: 'award' },
+            { key: 'Modular_Type', icon: 'cable' },
+            { key: 'Input_Voltage_Group', type: 'group_2_levels', icon: 'plug' }, 
+            { key: 'Operating_Altitude', icon: 'mountain' },
+            { key: 'Working_Temp', icon: 'thermometer' },
+            { key: '12V_2x6_Ports', icon: 'cpu' },
+            { key: 'Price_Positioning', type: 'toggle', toggleValue: 'V', icon: 'zap' } 
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -149,6 +223,48 @@
             });
         });
 
+        /**
+         * 語系切換
+         */
+        function changeLang(lang) {
+            currentLang = lang;
+            
+            // UI 按鈕狀態
+            const btnTw = document.getElementById('lang-tw');
+            const btnEn = document.getElementById('lang-en');
+            if (lang === 'tw') {
+                btnTw.className = 'px-4 py-1.5 text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow-lg';
+                btnEn.className = 'px-4 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200';
+            } else {
+                btnEn.className = 'px-4 py-1.5 text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow-lg';
+                btnTw.className = 'px-4 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200';
+            }
+
+            // 更新靜態文字
+            const dict = i18n[lang];
+            const updates = [
+                { id: 'ui-title', key: 'title' },
+                { id: 'ui-desc', key: 'desc' },
+                { id: 'ui-loading', key: 'loading' },
+                { id: 'ui-reset', key: 'reset' },
+                { id: 'ui-status-label-top', key: 'statusLabelTop' },
+                { id: 'ui-unit-top', key: 'unitTop' },
+                { id: 'ui-status-label-bottom', key: 'statusLabelBottom' },
+                { id: 'ui-unit-bottom', key: 'unitBottom' },
+                { id: 'ui-expand', key: 'expand' }
+            ];
+            updates.forEach(u => {
+                const el = document.getElementById(u.id);
+                if (el) el.innerText = dict[u.key];
+            });
+
+            // 重新渲染動態組件
+            renderFilterUI();
+            if (!document.getElementById('results-area').classList.contains('hidden')) {
+                renderResults();
+            }
+        }
+
         function loadDataFromURL() {
             Papa.parse(DATA_SOURCE_URL, {
                 download: true,
@@ -156,45 +272,35 @@
                 skipEmptyLines: true,
                 complete: function(results) {
                     allData = results.data;
-                    document.getElementById('loading-msg').style.display = 'none';
-                    initFilterUI(); // 第一步：建立永久的框架
-                    updateLogic();  // 第二步：計算資料
-                    renderFilterUI(); // 第三步：更新狀態
+                    const loadingMsg = document.getElementById('loading-msg');
+                    if (loadingMsg) loadingMsg.style.display = 'none';
+                    initFilterUI(); 
+                    updateLogic();  
+                    renderFilterUI(); 
                 },
                 error: function(err) {
                     document.getElementById('filters-container').innerHTML = 
-                        `<div class="text-red-400 text-center p-4 bg-red-900/20 rounded-xl border border-red-500/30">
-                            <strong>資料載入失敗！</strong><br>
-                            ${err.message || '無法讀取檔案'}
+                        `<div class="text-red-400 text-center p-4 bg-red-900/20 rounded-2xl border border-red-500/30">
+                            <strong>Data Load Failed!</strong><br>
+                            ${err.message || 'Check your URL or CORS settings.'}
                         </div>`;
                 }
             });
         }
 
-        // ==========================================
-        // 核心重構：將 UI 建立與 UI 更新拆分，消滅閃爍
-        // ==========================================
-
-        /**
-         * 建立永久的 DOM 框架 (只執行一次)
-         */
         function initFilterUI() {
             const container = document.getElementById('filters-container');
-            container.innerHTML = ''; // 只在這裡清空一次載入文字
+            if (!container) return;
+            container.innerHTML = ''; 
 
             CATEGORIES.forEach(cat => {
                 const rowDiv = document.createElement('div');
                 rowDiv.id = `cat-row-${cat.key}`;
-                // 預設先隱藏，讓 renderFilterUI 去決定誰該顯示
                 rowDiv.className = 'hidden flex-col items-start w-full py-4 border-b border-white/5 last:border-0';
 
                 if (cat.type === 'toggle') {
                     const toggleBtn = document.createElement('button');
                     toggleBtn.id = `cat-toggle-${cat.key}`;
-                    toggleBtn.innerHTML = `
-                        <i data-lucide="${cat.icon}" class="w-4 h-4"></i>
-                        <span class="btn-text whitespace-nowrap">${cat.label}</span>
-                    `;
                     toggleBtn.onclick = () => {
                         if (selectedFilters[cat.key]) delete selectedFilters[cat.key];
                         else selectedFilters[cat.key] = cat.toggleValue;
@@ -205,10 +311,6 @@
                 } else {
                     const headerBtn = document.createElement('button');
                     headerBtn.id = `cat-header-${cat.key}`;
-                    headerBtn.innerHTML = `
-                        <i data-lucide="${cat.icon}" class="w-4 h-4 icon-svg"></i> 
-                        <span class="btn-text whitespace-nowrap">${cat.label}</span>
-                    `;
                     headerBtn.onclick = () => {
                         if (expandedCategories.has(cat.key)) {
                             expandedCategories.delete(cat.key);
@@ -226,7 +328,6 @@
                     };
                     rowDiv.appendChild(headerBtn);
 
-                    // 存放子選項的專用容器
                     const optionsDiv = document.createElement('div');
                     optionsDiv.id = `cat-options-${cat.key}`;
                     optionsDiv.className = `options-container flex flex-row flex-wrap items-center gap-2.5 w-full`;
@@ -234,19 +335,17 @@
                 }
                 container.appendChild(rowDiv);
             });
-
-            // 框架建立好後，一次性轉譯所有的 Lucide 圖示 (後續更新就不再重轉譯)
             lucide.createIcons();
         }
 
-        /**
-         * 僅更新狀態與子選項 (不會銷毀主框架與圖示)
-         */
         function renderFilterUI() {
+            const lang = i18n[currentLang];
+
             CATEGORIES.forEach(cat => {
                 const rowDiv = document.getElementById(`cat-row-${cat.key}`);
+                if (!rowDiv) return;
+                const catLabel = lang[`cat_${cat.key}`];
 
-                // --- 處理 Toggle 按鈕狀態 ---
                 if (cat.type === 'toggle') {
                     let temp = getTempFiltered([cat.key]);
                     let hasValidItems = temp.some(item => item[cat.key] === cat.toggleValue);
@@ -261,15 +360,15 @@
                     rowDiv.classList.add('flex');
 
                     const toggleBtn = document.getElementById(`cat-toggle-${cat.key}`);
-                    const activeClass = 'bg-amber-500/20 border-amber-400/50 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]';
-                    const inactiveClass = 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20';
-
-                    toggleBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 ${isSelected ? activeClass : inactiveClass}`;
-                    toggleBtn.querySelector('.btn-text').innerText = isSelected ? `✓ ${cat.label}` : cat.label;
+                    if (toggleBtn) {
+                        const activeClass = 'bg-blue-600 border-blue-500 text-white shadow-lg';
+                        const inactiveClass = 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:border-blue-500/50';
+                        toggleBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-bold text-sm transition-all border flex items-center gap-2 ${isSelected ? activeClass : inactiveClass}`;
+                        toggleBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i> ${isSelected ? `✓ ${catLabel}` : catLabel}`;
+                    }
                     return; 
                 }
 
-                // --- 處理一般與階層類別的顯示狀態 ---
                 let availableOptions = [];
                 let l2Options = [];
                 if (cat.type === 'group_2_levels') {
@@ -297,133 +396,136 @@
                                    (cat.key === 'Wattage_W' && selectedWattageRange !== null) ||
                                    (cat.key === 'Input_Voltage_Group' && (selectedInputVoltage1 !== null || selectedFilters['Input_Voltage_2'] !== undefined));
 
-                // 更新標題列外觀
                 const headerBtn = document.getElementById(`cat-header-${cat.key}`);
-                headerBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 ${
-                    isExpanded || isSelected ? 'bg-white/10 border-white/20 text-white shadow-lg' : 'bg-transparent border-transparent text-slate-400 hover:text-slate-200'
-                }`;
-
-                // 更新 SVG 圖示顏色 (不銷毀重算，直接改 Class)
-                const iconSvg = headerBtn.querySelector('svg');
-                if (iconSvg) {
-                    if (isSelected) iconSvg.classList.add('text-blue-400');
-                    else iconSvg.classList.remove('text-blue-400');
+                if (headerBtn) {
+                    headerBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 ${
+                        isExpanded || isSelected ? 'bg-white/10 border-white/20 text-white' : 'bg-transparent border-transparent text-slate-500 hover:text-slate-200'
+                    }`;
+                    headerBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4 ${isSelected ? 'text-blue-400' : ''}"></i> ${catLabel}`;
                 }
 
-                // 更新子選項展開狀態
                 const optionsDiv = document.getElementById(`cat-options-${cat.key}`);
-                if (isExpanded || isSelected) {
-                    optionsDiv.classList.add('expanded');
-                } else {
-                    optionsDiv.classList.remove('expanded');
-                }
+                if (optionsDiv) {
+                    optionsDiv.className = `options-container flex flex-row flex-wrap items-center gap-2.5 w-full ${isExpanded || isSelected ? 'expanded' : ''}`;
+                    optionsDiv.innerHTML = '';
 
-                // 重繪內部的按鈕選項 (因為按鈕裡面沒有 Lucide 圖示，此處清空不會造成明顯閃爍)
-                optionsDiv.innerHTML = '';
-
-                // --- Input_Voltage_Group (三階層選項生成) ---
-                if (cat.type === 'group_2_levels') {
-                    let temp = getTempFiltered(['Input_Voltage_Group']); 
-                    l2Options.forEach(opt => {
-                        const isActive = selectedInputVoltage1 === opt;
-                        const btn = document.createElement('button');
-                        btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
-                            isActive ? 'bg-teal-500/20 border-teal-400/50 text-teal-300 shadow-[0_0_10px_rgba(45,212,191,0.2)]' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                        }`;
-                        btn.innerText = opt;
-                        
-                        btn.onclick = () => {
-                            if (isActive) {
-                                selectedInputVoltage1 = null;
-                                delete selectedFilters['Input_Voltage_2'];
-                            } else {
-                                selectedInputVoltage1 = opt;
-                                delete selectedFilters['Input_Voltage_2'];
-                                expandedCategories.add(cat.key);
-                                let matchingL3 = temp.filter(i => i['Input_Voltage'] === opt).map(i => i['Input_Voltage_2']).filter(v => v);
-                                let uniqueL3 = [...new Set(matchingL3)];
-                                if (uniqueL3.length === 1) selectedFilters['Input_Voltage_2'] = uniqueL3[0];
-                            }
-                            updateLogic();
-                            renderFilterUI();
-                        };
-                        optionsDiv.appendChild(btn);
-                    });
-
-                    if (selectedInputVoltage1) {
-                        const separator = document.createElement('span');
-                        separator.className = 'text-slate-500 mx-1 text-sm font-bold';
-                        separator.innerText = '>';
-                        optionsDiv.appendChild(separator);
-
-                        let l3Options = [...new Set(temp.filter(i => i['Input_Voltage'] === selectedInputVoltage1).map(i => i['Input_Voltage_2']).filter(v => v))];
-                        l3Options.forEach(opt => {
-                            const isActive = selectedFilters['Input_Voltage_2'] === opt;
+                    if (cat.type === 'group_2_levels') {
+                        let temp = getTempFiltered(['Input_Voltage_Group']); 
+                        l2Options.forEach(opt => {
+                            const isActive = selectedInputVoltage1 === opt;
                             const btn = document.createElement('button');
                             btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
-                                isActive ? 'bg-blue-500/20 border-blue-400/50 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.2)]' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                                isActive ? 'bg-teal-500/20 border-teal-400/50 text-teal-300' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
                             }`;
                             btn.innerText = opt;
                             btn.onclick = () => {
-                                if (isActive) delete selectedFilters['Input_Voltage_2'];
-                                else selectedFilters['Input_Voltage_2'] = opt;
+                                if (isActive) {
+                                    selectedInputVoltage1 = null;
+                                    delete selectedFilters['Input_Voltage_2'];
+                                } else {
+                                    selectedInputVoltage1 = opt;
+                                    delete selectedFilters['Input_Voltage_2'];
+                                    expandedCategories.add(cat.key);
+                                    let matchingL3 = temp.filter(i => i['Input_Voltage'] === opt).map(i => i['Input_Voltage_2']).filter(v => v);
+                                    let uniqueL3 = [...new Set(matchingL3)];
+                                    if (uniqueL3.length === 1) selectedFilters['Input_Voltage_2'] = uniqueL3[0];
+                                }
                                 updateLogic();
                                 renderFilterUI();
                             };
                             optionsDiv.appendChild(btn);
                         });
-                    }
-                } 
-                // --- Wattage_W (區間與具體選項生成) ---
-                else if (cat.key === 'Wattage_W') {
-                    WATTAGE_RANGES.forEach(range => {
-                        let hasData = availableOptions.some(opt => {
-                            let w = parseInt(opt) || 0;
-                            return w >= range.min && w <= range.max;
+
+                        if (selectedInputVoltage1) {
+                            const separator = document.createElement('span');
+                            separator.className = 'text-slate-500 mx-1 text-sm font-bold';
+                            separator.innerText = '>';
+                            optionsDiv.appendChild(separator);
+
+                            let l3Options = [...new Set(temp.filter(i => i['Input_Voltage'] === selectedInputVoltage1).map(i => i['Input_Voltage_2']).filter(v => v))];
+                            l3Options.forEach(opt => {
+                                const isActive = selectedFilters['Input_Voltage_2'] === opt;
+                                const btn = document.createElement('button');
+                                btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                                    isActive ? 'bg-blue-500/20 border-blue-500/50 text-blue-300' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                                }`;
+                                btn.innerText = opt;
+                                btn.onclick = () => {
+                                    if (isActive) delete selectedFilters['Input_Voltage_2'];
+                                    else selectedFilters['Input_Voltage_2'] = opt;
+                                    updateLogic();
+                                    renderFilterUI();
+                                };
+                                optionsDiv.appendChild(btn);
+                            });
+                        }
+                    } 
+                    else if (cat.key === 'Wattage_W') {
+                        WATTAGE_RANGES.forEach(range => {
+                            let hasData = availableOptions.some(opt => {
+                                let w = parseInt(opt) || 0;
+                                return w >= range.min && w <= range.max;
+                            });
+                            if (!hasData && selectedWattageRange !== range.id) return;
+
+                            const isRangeActive = selectedWattageRange === range.id;
+                            const rangeBtn = document.createElement('button');
+                            rangeBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                                isRangeActive ? 'bg-blue-600/20 border-blue-500 text-blue-300 shadow-md' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                            }`;
+                            rangeBtn.innerText = range.label;
+                            rangeBtn.onclick = () => {
+                                if (isRangeActive) {
+                                    selectedWattageRange = null;
+                                    delete selectedFilters['Wattage_W'];
+                                } else {
+                                    selectedWattageRange = range.id;
+                                    delete selectedFilters['Wattage_W'];
+                                    expandedCategories.add('Wattage_W');
+                                }
+                                updateLogic();
+                                renderFilterUI();
+                            };
+                            optionsDiv.appendChild(rangeBtn);
                         });
-                        if (!hasData && selectedWattageRange !== range.id) return;
 
-                        const isRangeActive = selectedWattageRange === range.id;
-                        const rangeBtn = document.createElement('button');
-                        rangeBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
-                            isRangeActive ? 'bg-indigo-500/20 border-indigo-400/50 text-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.2)]' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                        }`;
-                        rangeBtn.innerText = range.label;
-                        
-                        rangeBtn.onclick = () => {
-                            if (isRangeActive) {
-                                selectedWattageRange = null;
-                                delete selectedFilters['Wattage_W'];
-                            } else {
-                                selectedWattageRange = range.id;
-                                delete selectedFilters['Wattage_W'];
-                                expandedCategories.add('Wattage_W');
-                            }
-                            updateLogic();
-                            renderFilterUI();
-                        };
-                        optionsDiv.appendChild(rangeBtn);
-                    });
+                        if (selectedWattageRange) {
+                            const separator = document.createElement('span');
+                            separator.className = 'text-slate-500 mx-1 text-sm font-bold';
+                            separator.innerText = '>';
+                            optionsDiv.appendChild(separator);
 
-                    if (selectedWattageRange) {
-                        const separator = document.createElement('span');
-                        separator.className = 'text-slate-500 mx-1 text-sm font-bold';
-                        separator.innerText = '>';
-                        optionsDiv.appendChild(separator);
+                            let activeRangeDef = WATTAGE_RANGES.find(r => r.id === selectedWattageRange);
+                            let exactOptions = availableOptions.filter(opt => {
+                                let w = parseInt(opt) || 0;
+                                return w >= activeRangeDef.min && w <= activeRangeDef.max;
+                            });
 
-                        let activeRangeDef = WATTAGE_RANGES.find(r => r.id === selectedWattageRange);
-                        let exactOptions = availableOptions.filter(opt => {
-                            let w = parseInt(opt) || 0;
-                            return w >= activeRangeDef.min && w <= activeRangeDef.max;
-                        });
-
-                        exactOptions.forEach(opt => {
+                            exactOptions.forEach(opt => {
+                                const isActive = selectedFilters[cat.key] === opt;
+                                const optBtn = document.createElement('button');
+                                optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                                    isActive ? 'bg-blue-600 border-blue-500 text-white shadow-md' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                                }`;
+                                optBtn.innerText = opt + ' W';
+                                optBtn.onclick = () => {
+                                    if (isActive) delete selectedFilters[cat.key];
+                                    else selectedFilters[cat.key] = opt;
+                                    updateLogic();
+                                    renderFilterUI();
+                                };
+                                optionsDiv.appendChild(optBtn);
+                            });
+                        }
+                    } 
+                    else {
+                        availableOptions.forEach(opt => {
                             const isActive = selectedFilters[cat.key] === opt;
                             const optBtn = document.createElement('button');
                             optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
-                                isActive ? 'bg-blue-500/20 border-blue-400/50 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.2)]' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                                isActive ? 'bg-blue-600 border-blue-500 text-white shadow-md' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
                             }`;
-                            optBtn.innerText = opt + ' W';
+                            optBtn.innerText = opt;
                             optBtn.onclick = () => {
                                 if (isActive) delete selectedFilters[cat.key];
                                 else selectedFilters[cat.key] = opt;
@@ -433,38 +535,10 @@
                             optionsDiv.appendChild(optBtn);
                         });
                     }
-                } 
-                // --- 一般選項生成 ---
-                else {
-                    availableOptions.forEach(opt => {
-                        const isActive = selectedFilters[cat.key] === opt;
-                        const optBtn = document.createElement('button');
-                        optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
-                            isActive ? 'bg-blue-500/20 border-blue-400/50 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.2)]' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                        }`;
-                        optBtn.innerText = opt;
-                        optBtn.onclick = () => {
-                            if (isActive) delete selectedFilters[cat.key];
-                            else selectedFilters[cat.key] = opt;
-                            updateLogic();
-                            renderFilterUI();
-                        };
-                        optionsDiv.appendChild(optBtn);
-                    });
                 }
             });
-
-            const resetBtn = document.getElementById('reset-btn');
-            if (Object.keys(selectedFilters).length > 0 || selectedWattageRange || selectedInputVoltage1) {
-                resetBtn.classList.remove('hidden');
-            } else {
-                resetBtn.classList.add('hidden');
-            }
+            lucide.createIcons();
         }
-
-        // ==========================================
-        // 其他過濾邏輯保持不變
-        // ==========================================
 
         function updateLogic() {
             let tempBaseForToggle = getTempFiltered(['Price_Positioning']);
@@ -472,13 +546,8 @@
             if (tempBaseForToggle.length >= 20 || !hasValidToggle) {
                 delete selectedFilters['Price_Positioning'];
             }
-
             filteredData = getTempFiltered();
-            filteredData.sort((a, b) => {
-                let wa = parseInt(a.Wattage_W) || 0;
-                let wb = parseInt(b.Wattage_W) || 0;
-                return wb - wa;
-            });
+            filteredData.sort((a, b) => (parseInt(b.Wattage_W) || 0) - (parseInt(a.Wattage_W) || 0));
             checkDisplayRules();
         }
 
@@ -510,51 +579,51 @@
         function checkDisplayRules() {
             const resultsArea = document.getElementById('results-area');
             const showBtn = document.getElementById('show-results-btn');
-            
             const statusTextTop = document.getElementById('status-text-top');
             const statusTextBottom = document.getElementById('status-text-bottom');
             const resultCountTop = document.getElementById('result-count-top');
             const resultCountBottom = document.getElementById('result-count-bottom');
             
             const count = filteredData.length;
-            
             let filterCount = Object.keys(selectedFilters).length;
             if (selectedWattageRange && !selectedFilters['Wattage_W']) filterCount++;
             if (selectedInputVoltage1 && !selectedFilters['Input_Voltage_2']) filterCount++;
 
             if (count > 51) {
-                statusTextTop.classList.add('hidden');
-                statusTextBottom.classList.add('hidden');
+                if (statusTextTop) statusTextTop.classList.add('hidden');
+                if (statusTextBottom) statusTextBottom.classList.add('hidden');
             } else {
-                statusTextTop.classList.remove('hidden');
-                statusTextBottom.classList.remove('hidden');
-                resultCountTop.innerText = count;
-                resultCountBottom.innerText = count;
+                if (statusTextTop) statusTextTop.classList.remove('hidden');
+                if (statusTextBottom) statusTextBottom.classList.remove('hidden');
+                if (resultCountTop) resultCountTop.innerText = count;
+                if (resultCountBottom) resultCountBottom.innerText = count;
             }
 
-            resultsArea.classList.add('hidden');
-            showBtn.classList.add('hidden');
+            if (resultsArea) resultsArea.classList.add('hidden');
+            if (showBtn) showBtn.classList.add('hidden');
 
             if (count === 0 && filterCount > 0) {
-                resultsArea.classList.remove('hidden');
+                if (resultsArea) resultsArea.classList.remove('hidden');
                 renderResults();
             } else if (count < 16 && count > 0) {
-                resultsArea.classList.remove('hidden');
+                if (resultsArea) resultsArea.classList.remove('hidden');
                 renderResults();
             } else if (filterCount >= 4) { 
-                showBtn.classList.remove('hidden');
+                if (showBtn) showBtn.classList.remove('hidden');
             }
         }
 
         function renderResults() {
             const container = document.getElementById('results-area');
+            if (!container) return;
             container.innerHTML = '';
+            const lang = i18n[currentLang];
 
             if (filteredData.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-full py-16 flex flex-col items-center justify-center glass-panel rounded-2xl text-slate-400">
-                        <i data-lucide="frown" class="w-12 h-12 mb-4 text-slate-500 opacity-50"></i>
-                        <p class="text-lg">查無符合條件的電源供應器</p>
+                    <div class="col-span-full py-20 flex flex-col items-center justify-center glass-panel rounded-3xl text-slate-500">
+                        <i data-lucide="shield-alert" class="w-16 h-16 mb-4 opacity-50 text-blue-400"></i>
+                        <p class="text-xl font-medium">${lang.noResult}</p>
                     </div>`;
                 lucide.createIcons();
                 return;
@@ -563,81 +632,66 @@
             filteredData.forEach(item => {
                 const card = document.createElement('div');
                 const isHighCP = item.Price_Positioning === 'V';
-                
-                const baseGlass = 'bg-white/5 backdrop-blur-xl transition-all duration-300 hover:bg-white/10 hover:-translate-y-1';
+                const baseClass = 'bg-white/5 backdrop-blur-xl transition-all duration-300 hover:bg-white/10 hover:-translate-y-1';
                 const borderClass = isHighCP 
-                    ? 'border border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.15)]' 
-                    : 'border border-white/10 shadow-xl';
+                    ? 'border-2 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]' 
+                    : 'border border-white/10 shadow-2xl';
                 
-                card.className = `relative rounded-2xl p-6 flex flex-col h-full ${baseGlass} ${borderClass}`;
+                card.className = `relative rounded-3xl p-6 flex flex-col h-full overflow-hidden ${baseClass} ${borderClass}`;
                 
-                let badgeHTML = '';
-                if (isHighCP) {
-                    badgeHTML = `
-                        <div class="absolute -top-3 -right-3 bg-amber-500 text-slate-900 text-xs font-black px-3 py-1 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] flex items-center gap-1 border border-amber-300">
-                            <i data-lucide="flame" class="w-3 h-3"></i> C/P 首選
-                        </div>
-                    `;
-                }
+                let ribbonHTML = isHighCP ? `<div class="absolute top-0 right-0"><div class="bg-blue-600 text-white text-[10px] font-black px-4 py-1.5 rounded-bl-2xl shadow-lg flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="award" class="w-3.5 h-3.5"></i> ${lang.cp_badge}</div></div>` : '';
 
                 card.innerHTML = `
-                    ${badgeHTML}
-                    <div class="mb-5">
-                        <div class="inline-block px-2.5 py-1 bg-white/10 text-slate-300 text-[10px] font-bold tracking-wider rounded border border-white/5 uppercase mb-3">
-                            ${item.Form_Factor || 'Unknown'}
+                    ${ribbonHTML}
+                    <div class="mb-5 pr-20">
+                        <div class="inline-block px-2.5 py-1 bg-white/10 text-blue-300 text-[10px] font-bold tracking-wider rounded-lg border border-white/5 uppercase mb-3">
+                            ${item.Form_Factor || 'UNK'}
                         </div>
                         <h3 class="text-xl font-bold text-white leading-tight mb-1">${item.Model_Name}</h3>
-                        <p class="text-sm text-slate-400 font-medium">${item.ATX_Version || '標準未定義'}</p>
+                        <p class="text-xs text-slate-500 font-medium">${item.ATX_Version || 'SPEC_UNDEF'}</p>
                     </div>
                     
-                    <div class="flex items-end gap-3 mb-6 pb-6 border-b border-white/10">
-                        <div class="flex-grow">
-                            <span class="text-4xl font-black text-white tracking-tight drop-shadow-md">${item.Wattage_W}</span>
-                            <span class="text-blue-400 font-bold ml-1">W</span>
+                    <div class="flex items-center justify-between mb-6 pb-6 border-b border-white/5">
+                        <div class="flex items-baseline">
+                            <span class="text-5xl font-black text-white tracking-tighter">${item.Wattage_W}</span>
+                            <span class="text-blue-400 font-bold text-xl ml-1">W</span>
                         </div>
-                        <div class="text-right">
-                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">80 PLUS</div>
-                            <div class="font-bold text-sm ${item.Efficiency_Level && item.Efficiency_Level.includes('Titanium') ? 'text-slate-200' : 'text-amber-400'} drop-shadow-md">
+                        <div class="text-right flex flex-col items-end">
+                            <div class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">${lang.label_efficiency}</div>
+                            <div class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-lg font-black text-xs border border-blue-500/30 tracking-wide">
                                 ${item.Efficiency_Level || '-'}
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-y-4 gap-x-3 text-sm mt-auto">
-                        <div class="flex items-start gap-2.5">
-                            <div class="p-1.5 rounded-lg bg-white/5 border border-white/5 shrink-0"><i data-lucide="cable" class="w-3.5 h-3.5 text-blue-300"></i></div>
-                            <div class="min-w-0 pt-0.5">
-                                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">線材</div>
-                                <div class="font-medium text-slate-300 truncate">${item.Modular_Type || '-'}</div>
-                            </div>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="flex flex-col items-center justify-center p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors text-center">
+                            <i data-lucide="cable" class="w-4 h-4 text-blue-400 mb-1.5"></i>
+                            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">${lang.label_modular}</span>
+                            <span class="text-sm font-semibold text-slate-200 truncate w-full px-1">${item.Modular_Type || '-'}</span>
                         </div>
-                        <div class="flex items-start gap-2.5">
-                            <div class="p-1.5 rounded-lg bg-white/5 border border-white/5 shrink-0"><i data-lucide="cpu" class="w-3.5 h-3.5 text-blue-300"></i></div>
-                            <div class="min-w-0 pt-0.5">
-                                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">12V-2x6</div>
-                                <div class="font-medium text-slate-300 truncate">${item['12V_2x6_Ports'] > 0 ? item['12V_2x6_Ports'] + ' 組' : '無'}</div>
-                            </div>
+                        <div class="flex flex-col items-center justify-center p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors text-center">
+                            <i data-lucide="cpu" class="w-4 h-4 text-blue-400 mb-1.5"></i>
+                            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">${lang.label_ports}</span>
+                            <span class="text-sm font-semibold text-slate-200">${item['12V_2x6_Ports'] > 0 ? item['12V_2x6_Ports'] + lang.val_unit_ports : lang.val_none}</span>
                         </div>
-                        <div class="flex items-start gap-2.5">
-                            <div class="p-1.5 rounded-lg bg-white/5 border border-white/5 shrink-0"><i data-lucide="plug" class="w-3.5 h-3.5 text-blue-300"></i></div>
-                            <div class="min-w-0 pt-0.5">
-                                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">輸入電壓</div>
-                                <div class="font-medium text-slate-300 truncate">${item.Input_Voltage_2 || '-'}</div>
-                            </div>
+                        <div class="flex flex-col items-center justify-center p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors text-center">
+                            <i data-lucide="plug" class="w-4 h-4 text-blue-400 mb-1.5"></i>
+                            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">${lang.label_voltage}</span>
+                            <span class="text-sm font-semibold text-slate-200">${item.Input_Voltage_2 || '-'}</span>
                         </div>
-                        <div class="flex items-start gap-2.5">
-                            <div class="p-1.5 rounded-lg bg-white/5 border border-white/5 shrink-0"><i data-lucide="mountain" class="w-3.5 h-3.5 text-blue-300"></i></div>
-                            <div class="min-w-0 pt-0.5">
-                                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">工作海拔</div>
-                                <div class="font-medium text-slate-300 truncate">${item.Operating_Altitude || '-'}</div>
-                            </div>
+                        <div class="flex flex-col items-center justify-center p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors text-center">
+                            <div class="flex gap-2 mb-1.5"><i data-lucide="thermometer" class="w-4 h-4 text-blue-400"></i><i data-lucide="mountain" class="w-4 h-4 text-blue-400"></i></div>
+                            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">${lang.label_env}</span>
+                            <span class="text-xs font-semibold text-slate-200 leading-tight">${item.Working_Temp || '-'}<br>${item.Operating_Altitude || '-'}</span>
                         </div>
-                        <div class="col-span-2 flex items-start gap-2.5 mt-1">
-                            <div class="p-1.5 rounded-lg bg-white/5 border border-white/5 shrink-0"><i data-lucide="thermometer" class="w-3.5 h-3.5 text-blue-300"></i></div>
-                            <div class="min-w-0 pt-0.5">
-                                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">工作溫度</div>
-                                <div class="font-medium text-slate-300 truncate">${item.Working_Temp || '-'}</div>
-                            </div>
+                    </div>
+
+                    <div class="mt-auto flex items-center gap-2 text-[10px] text-slate-500 bg-black/20 p-2.5 rounded-xl border border-white/5">
+                        <i data-lucide="layout-template" class="w-3.5 h-3.5 text-blue-500"></i>
+                        <div>
+                            <span class="font-bold text-slate-400 uppercase tracking-tight">${lang.label_dimensions}:</span> 
+                            <span class="text-slate-200 font-medium ml-1">${item.Dimension_2 || '-'} mm</span>
                         </div>
                     </div>
                 `;
