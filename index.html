@@ -198,7 +198,6 @@
                 cp_badge: "C/P 值之王",
                 unit_ports: "組",
                 val_none: "無",
-                // 表單與新按鈕翻譯
                 inquiry_hint: "以上都不符合您的系統需求？",
                 inquiry_btn: "告訴我們您的特殊需求",
                 inquiry_btn_empty: "找不到合適規格？向 PM 提出客製化需求",
@@ -245,7 +244,6 @@
                 cp_badge: "Best C/P",
                 unit_ports: " Port(s)",
                 val_none: "None",
-                // 表單與新按鈕翻譯
                 inquiry_hint: "None of the above fit your requirements?",
                 inquiry_btn: "Tell us your specific needs",
                 inquiry_btn_empty: "No matches? Request customization from PM",
@@ -255,8 +253,8 @@
                 modal_annual: "Annual Demand *",
                 modal_monthly: "Monthly Demand *",
                 modal_leadtime: "Lead Time & Status *",
-                modal_npi: "Can wait for new product development",
-                modal_mp: "Need mass production model immediately",
+                modal_npi: "Can wait for NPI",
+                modal_mp: "Need MP model immediately",
                 modal_notes: "Special Requirements / Others",
                 modal_cancel: "Cancel",
                 modal_submit: "Send to PM",
@@ -326,13 +324,11 @@
                 btnTw.className = 'px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:text-slate-700';
             }
             
-            // 更新靜態文字
             const textUpdates = [
                 { id: 'ui-title', key: 'title' }, { id: 'ui-desc', key: 'desc' }, { id: 'ui-loading', key: 'loading' },
                 { id: 'ui-reset', key: 'reset' }, { id: 'ui-status-label-top', key: 'statusLabelTop' },
                 { id: 'ui-unit-top', key: 'unitTop' }, { id: 'ui-status-label-bottom', key: 'statusLabelBottom' },
                 { id: 'ui-unit-bottom', key: 'unitBottom' }, { id: 'ui-expand', key: 'expand' },
-                // 表單與新按鈕
                 { id: 'ui-inquiry-hint', key: 'inquiry_hint'}, { id: 'ui-inquiry-btn', key: 'inquiry_btn'},
                 { id: 'ui-modal-title', key: 'modal_title'}, { id: 'ui-modal-specs-title', key: 'modal_specs_title'},
                 { id: 'ui-modal-name', key: 'modal_name'}, { id: 'ui-modal-annual', key: 'modal_annual'},
@@ -352,19 +348,14 @@
                 }
             });
             
-            // 空狀態的按鈕需要重繪 Results
             renderFilterUI();
             if (!document.getElementById('results-area').classList.contains('hidden')) renderResults();
         }
 
-        // =========================
-        // 表單視窗 Modal 邏輯
-        // =========================
         function openInquiryModal() {
             const modal = document.getElementById('inquiry-modal');
             const content = document.getElementById('inquiry-modal-content');
             
-            // 抓取並整理目前的使用者選項
             let specs = [];
             const lang = i18n[currentLang];
             
@@ -384,9 +375,7 @@
             const specsText = specs.length > 0 ? specs.join('\n') : (currentLang === 'tw' ? "未指定條件" : "No specific conditions");
             document.getElementById('inq-specs-text').innerText = specsText;
 
-            // 顯示動畫
             modal.classList.remove('hidden');
-            // setTimeout allow browser to render block before fading in
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 content.classList.remove('scale-95');
@@ -404,47 +393,45 @@
             
             setTimeout(() => {
                 modal.classList.add('hidden');
-            }, 300); // 對應 Tailwind 的 duration-300
+            }, 300);
         }
 
+        // 修改後的發信功能 (中英雙語版本)
         function submitInquiry() {
             const lang = i18n[currentLang];
             
-            // 取得欄位值
             const name = document.getElementById('inq-name').value.trim();
             const annual = document.getElementById('inq-annual').value.trim();
             const monthly = document.getElementById('inq-monthly').value.trim();
             const leadtimeObj = document.querySelector('input[name="inq-leadtime"]:checked');
             const notes = document.getElementById('inq-notes').value.trim();
 
-            // 驗證必填
             if(!name || !annual || !monthly || !leadtimeObj) {
                 alert(lang.alert_required);
                 return;
             }
 
-            const leadtimeVal = leadtimeObj.value === 'A' ? lang.modal_npi : lang.modal_mp;
+            // 抓取中英文狀態
+            const leadtimeValTw = leadtimeObj.value === 'A' ? "可等待新產品開發" : "需量產機型立即出貨";
+            const leadtimeValEn = leadtimeObj.value === 'A' ? "Can wait for NPI" : "Need MP model immediately";
             const filterText = document.getElementById('inq-specs-text').innerText;
 
-            // 組合信件內容 (適用 mailto)
-            const subject = encodeURIComponent("PC PSU 客製化需求詢價");
+            const subject = encodeURIComponent("PC PSU 客製化需求詢價 / Customization Request");
             const body = encodeURIComponent(
-                `【客戶基本資訊】\n` +
-                `客戶名稱：${name}\n` +
-                `年需求數量：${annual}\n` +
-                `月需求數量：${monthly}\n` +
-                `交期與狀態：${leadtimeVal}\n\n` +
-                `【特別要求/其他】\n` +
-                `${notes || '無'}\n\n` +
+                `【客戶基本資訊 / Customer Info】\n` +
+                `客戶名稱 / Name: ${name}\n` +
+                `年需求數量 / Annual Demand: ${annual}\n` +
+                `月需求數量 / Monthly Demand: ${monthly}\n` +
+                `交期與狀態 / Lead Time & Status: ${leadtimeValTw} (${leadtimeValEn})\n\n` +
+                `【特別要求與其他 / Special Requirements & Others】\n` +
+                `${notes || '無 / None'}\n\n` +
                 `------------------------\n` +
-                `【客戶已選取的技術規格參考】\n` +
+                `【已選取的技術規格參考 / Targeted Specs Reference】\n` +
                 `${filterText}`
             );
 
-            // 呼叫本機郵件軟體
             window.location.href = `mailto:hansou@fsp-group.com.tw?subject=${subject}&body=${body}`;
             
-            // 清空表單並關閉視窗
             document.getElementById('inq-name').value = '';
             document.getElementById('inq-annual').value = '';
             document.getElementById('inq-monthly').value = '';
@@ -452,7 +439,32 @@
             document.getElementById('inq-notes').value = '';
             closeInquiryModal();
         }
-        // =========================
+
+        // 統一共用的自定義選項排序函數
+        function sortCategoryOptions(options, categoryKey) {
+            if (categoryKey === 'Wattage_W') {
+                return options.sort((a, b) => parseInt(a) - parseInt(b));
+            } else if (categoryKey === 'Efficiency_Level') {
+                // 特製的效率等級排序邏輯 (註：已補上金牌避免潛在的遺漏錯誤)
+                const effOrder = [
+                    "Titanium", "Platinum", "Gold", "Silver", "Bronze", "Standard", "Non-80",
+                    "230V EU Titanium", "230V EU Platinum", "230V EU Gold", "230V EU Silver", "230V EU Bronze", "230V EU Standard"
+                ];
+                return options.sort((a, b) => {
+                    let idxA = effOrder.findIndex(o => a === o || a.includes(o));
+                    let idxB = effOrder.findIndex(o => b === o || b.includes(o));
+                    
+                    // 如果找不到對應的字串，將它放到最後面
+                    idxA = idxA === -1 ? 999 : idxA;
+                    idxB = idxB === -1 ? 999 : idxB;
+                    
+                    if (idxA === idxB) return a.localeCompare(b);
+                    return idxA - idxB;
+                });
+            } else {
+                return options.sort();
+            }
+        }
 
         function loadDataFromURL() {
             Papa.parse(DATA_SOURCE_URL, {
@@ -526,49 +538,94 @@
                 const rowDiv = document.getElementById(`cat-row-${cat.key}`);
                 if (!rowDiv) return;
                 const catLabel = lang[`cat_${cat.key}`];
+
                 if (cat.type === 'toggle') {
                     let temp = getTempFiltered([cat.key]);
                     let hasValidItems = temp.some(item => item[cat.key] === cat.toggleValue);
                     let isSelected = selectedFilters[cat.key] === cat.toggleValue;
-                    if (temp.length >= 20 || !hasValidItems) { rowDiv.classList.add('hidden'); rowDiv.classList.remove('flex'); return; }
-                    rowDiv.classList.remove('hidden'); rowDiv.classList.add('flex');
+                    
+                    if (temp.length >= 20) { 
+                        rowDiv.classList.add('hidden'); 
+                        rowDiv.classList.remove('flex'); 
+                        return; 
+                    }
+                    
+                    rowDiv.classList.remove('hidden'); 
+                    rowDiv.classList.add('flex');
                     const toggleBtn = document.getElementById(`cat-toggle-${cat.key}`);
                     if (toggleBtn) {
-                        const activeClass = 'bg-orange-500 border-orange-600 text-white shadow-sm';
-                        const inactiveClass = 'bg-white border-slate-300 text-slate-700 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600';
-                        toggleBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 ${isSelected ? activeClass : inactiveClass}`;
+                        if (isSelected) {
+                            toggleBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 bg-orange-500 border-orange-600 text-white shadow-sm`;
+                            toggleBtn.disabled = false;
+                        } else if (hasValidItems) {
+                            toggleBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 bg-white border-slate-300 text-slate-700 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 cursor-pointer`;
+                            toggleBtn.disabled = false;
+                        } else {
+                            toggleBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
+                            toggleBtn.disabled = true;
+                        }
                         toggleBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i> ${isSelected ? `✓ ${catLabel}` : catLabel}`;
                     }
                     return; 
                 }
+
+                let allPossibleOptions = [];
+                let allPossibleL2Options = [];
                 let availableOptions = [];
-                let l2Options = [];
+                let availableL2Options = [];
+                
                 if (cat.type === 'group_2_levels') {
-                    let temp = getTempFiltered(['Input_Voltage_Group']); 
-                    l2Options = [...new Set(temp.map(i => i['Input_Voltage']).filter(v => v))];
-                    if (l2Options.length === 0) { rowDiv.classList.add('hidden'); rowDiv.classList.remove('flex'); return; }
+                    allPossibleL2Options = [...new Set(allData.map(i => i['Input_Voltage']).filter(v => v))];
+                    if (allPossibleL2Options.length === 0) { rowDiv.classList.add('hidden'); rowDiv.classList.remove('flex'); return; }
+                } else {
+                    allPossibleOptions = [...new Set(allData.map(item => item[cat.key]).filter(val => val && val.trim() !== ''))];
+                    sortCategoryOptions(allPossibleOptions, cat.key);
+                    if (allPossibleOptions.length === 0) { rowDiv.classList.add('hidden'); rowDiv.classList.remove('flex'); return; }
+                }
+
+                if (cat.type === 'group_2_levels') {
+                    let temp = getTempFiltered(['Input_Voltage_Group']);
+                    availableL2Options = [...new Set(temp.map(i => i['Input_Voltage']).filter(v => v))];
                 } else {
                     availableOptions = getAvailableOptionsForCategory(cat.key);
-                    if (availableOptions.length === 0) { rowDiv.classList.add('hidden'); rowDiv.classList.remove('flex'); return; }
                 }
-                rowDiv.classList.remove('hidden'); rowDiv.classList.add('flex');
+
+                rowDiv.classList.remove('hidden'); 
+                rowDiv.classList.add('flex');
+                
                 const isExpanded = expandedCategories.has(cat.key);
                 const isSelected = selectedFilters[cat.key] !== undefined || (cat.key === 'Wattage_W' && selectedWattageRange !== null) || (cat.key === 'Input_Voltage_Group' && (selectedInputVoltage1 !== null || selectedFilters['Input_Voltage_2'] !== undefined));
+                
                 const headerBtn = document.getElementById(`cat-header-${cat.key}`);
                 if (headerBtn) {
                     headerBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 ${isExpanded || isSelected ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm' : 'bg-transparent border-transparent text-slate-600 hover:bg-slate-50'}`;
                     headerBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4 ${isSelected ? 'text-blue-600' : ''}"></i> ${catLabel}`;
                 }
+                
                 const optionsDiv = document.getElementById(`cat-options-${cat.key}`);
                 if (optionsDiv) {
                     optionsDiv.className = `options-container flex flex-row flex-wrap items-center gap-2.5 w-full ${isExpanded || isSelected ? 'expanded' : ''}`;
                     optionsDiv.innerHTML = '';
+                    
                     if (cat.type === 'group_2_levels') {
                         let temp = getTempFiltered(['Input_Voltage_Group']); 
-                        l2Options.forEach(opt => {
+                        
+                        allPossibleL2Options.forEach(opt => {
+                            const isAvailable = availableL2Options.includes(opt);
                             const isActive = selectedInputVoltage1 === opt;
                             const btn = document.createElement('button');
-                            btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${isActive ? 'bg-teal-600 border-teal-600 text-white shadow-sm' : 'bg-white border-slate-300 text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700'}`;
+                            
+                            if (isActive) {
+                                btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-teal-600 border-teal-600 text-white shadow-sm`;
+                                btn.disabled = false;
+                            } else if (isAvailable) {
+                                btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 cursor-pointer`;
+                                btn.disabled = false;
+                            } else {
+                                btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
+                                btn.disabled = true;
+                            }
+                            
                             btn.innerText = opt;
                             btn.onclick = () => {
                                 if (isActive) { selectedInputVoltage1 = null; delete selectedFilters['Input_Voltage_2']; }
@@ -577,47 +634,111 @@
                             };
                             optionsDiv.appendChild(btn);
                         });
+
                         if (selectedInputVoltage1) {
-                            const separator = document.createElement('span'); separator.className = 'text-slate-400 mx-1 text-sm font-bold'; separator.innerText = '>'; optionsDiv.appendChild(separator);
-                            let l3Options = [...new Set(temp.filter(i => i['Input_Voltage'] === selectedInputVoltage1).map(i => i['Input_Voltage_2']).filter(v => v))];
-                            l3Options.forEach(opt => {
+                            const separator = document.createElement('span'); 
+                            separator.className = 'text-slate-400 mx-1 text-sm font-bold'; 
+                            separator.innerText = '>'; 
+                            optionsDiv.appendChild(separator);
+                            
+                            let allPossibleL3Options = [...new Set(allData.filter(i => i['Input_Voltage'] === selectedInputVoltage1).map(i => i['Input_Voltage_2']).filter(v => v))];
+                            let availableL3Options = [...new Set(temp.filter(i => i['Input_Voltage'] === selectedInputVoltage1).map(i => i['Input_Voltage_2']).filter(v => v))];
+
+                            allPossibleL3Options.forEach(opt => {
+                                const isAvailable = availableL3Options.includes(opt);
                                 const isActive = selectedFilters['Input_Voltage_2'] === opt;
                                 const btn = document.createElement('button');
-                                btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${isActive ? 'bg-blue-600 border-blue-600 text-white shadow-sm' : 'bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700'}`;
+                                
+                                if (isActive) {
+                                    btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-blue-600 border-blue-600 text-white shadow-sm`;
+                                    btn.disabled = false;
+                                } else if (isAvailable) {
+                                    btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 cursor-pointer`;
+                                    btn.disabled = false;
+                                } else {
+                                    btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
+                                    btn.disabled = true;
+                                }
+
                                 btn.innerText = opt;
                                 btn.onclick = () => { if (isActive) delete selectedFilters['Input_Voltage_2']; else selectedFilters['Input_Voltage_2'] = opt; updateLogic(); renderFilterUI(); };
                                 optionsDiv.appendChild(btn);
                             });
                         }
-                    } else if (cat.key === 'Wattage_W') {
+                    } 
+                    else if (cat.key === 'Wattage_W') {
                         WATTAGE_RANGES.forEach(range => {
-                            let hasData = availableOptions.some(opt => { let w = parseInt(opt) || 0; return w >= range.min && w <= range.max; });
-                            if (!hasData && selectedWattageRange !== range.id) return;
+                            let hasDataInAll = allPossibleOptions.some(opt => { let w = parseInt(opt) || 0; return w >= range.min && w <= range.max; });
+                            if (!hasDataInAll && selectedWattageRange !== range.id) return; 
+                            
+                            let isAvailable = availableOptions.some(opt => { let w = parseInt(opt) || 0; return w >= range.min && w <= range.max; });
                             const isRangeActive = selectedWattageRange === range.id;
+                            
                             const rangeBtn = document.createElement('button');
-                            rangeBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${isRangeActive ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white border-slate-300 text-slate-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700'}`;
+                            if (isRangeActive) {
+                                rangeBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-indigo-600 border-indigo-600 text-white shadow-sm`;
+                                rangeBtn.disabled = false;
+                            } else if (isAvailable) {
+                                rangeBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 cursor-pointer`;
+                                rangeBtn.disabled = false;
+                            } else {
+                                rangeBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
+                                rangeBtn.disabled = true;
+                            }
+
                             rangeBtn.innerText = range.label;
                             rangeBtn.onclick = () => { if (isRangeActive) { selectedWattageRange = null; delete selectedFilters['Wattage_W']; } else { selectedWattageRange = range.id; delete selectedFilters['Wattage_W']; expandedCategories.add('Wattage_W'); } updateLogic(); renderFilterUI(); };
                             optionsDiv.appendChild(rangeBtn);
                         });
+
                         if (selectedWattageRange) {
-                            const separator = document.createElement('span'); separator.className = 'text-slate-400 mx-1 text-sm font-bold'; separator.innerText = '>'; optionsDiv.appendChild(separator);
+                            const separator = document.createElement('span'); 
+                            separator.className = 'text-slate-400 mx-1 text-sm font-bold'; 
+                            separator.innerText = '>'; 
+                            optionsDiv.appendChild(separator);
+                            
                             let activeRangeDef = WATTAGE_RANGES.find(r => r.id === selectedWattageRange);
-                            let exactOptions = availableOptions.filter(opt => { let w = parseInt(opt) || 0; return w >= activeRangeDef.min && w <= activeRangeDef.max; });
-                            exactOptions.forEach(opt => {
+                            let exactAllOptions = allPossibleOptions.filter(opt => { let w = parseInt(opt) || 0; return w >= activeRangeDef.min && w <= activeRangeDef.max; });
+                            
+                            exactAllOptions.forEach(opt => {
+                                const isAvailable = availableOptions.includes(opt);
                                 const isActive = selectedFilters[cat.key] === opt;
                                 const optBtn = document.createElement('button');
-                                optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${isActive ? 'bg-blue-600 border-blue-600 text-white shadow-sm' : 'bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700'}`;
+                                
+                                if (isActive) {
+                                    optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-blue-600 border-blue-600 text-white shadow-sm`;
+                                    optBtn.disabled = false;
+                                } else if (isAvailable) {
+                                    optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 cursor-pointer`;
+                                    optBtn.disabled = false;
+                                } else {
+                                    optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
+                                    optBtn.disabled = true;
+                                }
+
                                 optBtn.innerText = opt + ' W';
                                 optBtn.onclick = () => { if (isActive) delete selectedFilters[cat.key]; else selectedFilters[cat.key] = opt; updateLogic(); renderFilterUI(); };
                                 optionsDiv.appendChild(optBtn);
                             });
                         }
-                    } else {
-                        availableOptions.forEach(opt => {
+                    } 
+                    else {
+                        allPossibleOptions.forEach(opt => {
+                            const isAvailable = availableOptions.includes(opt);
                             const isActive = selectedFilters[cat.key] === opt;
                             const optBtn = document.createElement('button');
-                            optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${isActive ? 'bg-blue-600 border-blue-600 text-white shadow-sm' : 'bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700'}`;
+                            
+                            if (isActive) {
+                                optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-blue-600 border-blue-600 text-white shadow-sm`;
+                                optBtn.disabled = false;
+                            } else if (isAvailable) {
+                                optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 cursor-pointer`;
+                                optBtn.disabled = false;
+                            } else {
+                                optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
+                                optBtn.disabled = true;
+                            }
+
                             optBtn.innerText = opt;
                             optBtn.onclick = () => { if (isActive) delete selectedFilters[cat.key]; else selectedFilters[cat.key] = opt; updateLogic(); renderFilterUI(); };
                             optionsDiv.appendChild(optBtn);
@@ -649,8 +770,7 @@
         function getAvailableOptionsForCategory(categoryKey) {
             let tempFiltered = getTempFiltered([categoryKey]);
             let options = [...new Set(tempFiltered.map(item => item[categoryKey]).filter(val => val && val.trim() !== ''))];
-            if (categoryKey === 'Wattage_W') options.sort((a, b) => parseInt(a) - parseInt(b)); else options.sort();
-            return options;
+            return sortCategoryOptions(options, categoryKey);
         }
 
         function checkDisplayRules() {
@@ -668,7 +788,6 @@
             if (selectedWattageRange && !selectedFilters['Wattage_W']) filterCount++;
             if (selectedInputVoltage1 && !selectedFilters['Input_Voltage_2']) filterCount++;
 
-            // 重新選取按鈕的顯示邏輯
             const resetBtn = document.getElementById('reset-btn');
             if (filterCount > 0 || selectedWattageRange || selectedInputVoltage1) {
                 if (resetBtn) resetBtn.classList.remove('hidden');
@@ -696,7 +815,7 @@
             }
             else if (count < 16 && count > 0) { 
                 if (resultsArea) resultsArea.classList.remove('hidden'); 
-                if (bottomInqContainer) bottomInqContainer.classList.remove('hidden'); // 展開時顯示底部按鈕
+                if (bottomInqContainer) bottomInqContainer.classList.remove('hidden');
                 renderResults(); 
             }
             else if (filterCount >= 4) {
@@ -731,7 +850,6 @@
             const lang = i18n[currentLang];
 
             if (filteredData.length === 0) {
-                // 空狀態：自帶詢問按鈕
                 container.innerHTML = `
                     <div class="col-span-full py-16 flex flex-col items-center justify-center bg-white rounded-2xl border border-dashed border-slate-300 text-slate-400">
                         <i data-lucide="frown" class="w-12 h-12 mb-4 text-slate-300"></i>
@@ -799,6 +917,7 @@
                         </div>
                     </div>
 
+                    <!-- 產品尺寸顯示區 (最下方) -->
                     <div class="mt-auto flex items-center gap-2 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                         <i data-lucide="layout-template" class="w-3.5 h-3.5 text-slate-400"></i>
                         <div>
