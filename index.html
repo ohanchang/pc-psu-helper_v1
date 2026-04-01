@@ -235,6 +235,24 @@
             max-height: 0; opacity: 0; overflow: hidden; margin-top: 0;
         }
         .options-container.expanded { max-height: 800px; opacity: 1; margin-top: 0.75rem; overflow: visible; }
+
+        /* 暗黑系主題 (Cyberpunk / Military / OLED) 自動覆寫為深色金屬標章 */
+        [data-theme="cyberpunk"], [data-theme="military"], [data-theme="oled"] {
+            --bdg-ti-bg: linear-gradient(135deg, #3f3f46 0%, #18181b 100%); --bdg-ti-text: #f4f4f5; --bdg-ti-border: #52525b;
+            --bdg-pl-bg: linear-gradient(135deg, #0ea5e9 0%, #0c4a6e 100%); --bdg-pl-text: #e0f2fe; --bdg-pl-border: #38bdf8;
+            --bdg-gd-bg: linear-gradient(135deg, #ca8a04 0%, #422006 100%); --bdg-gd-text: #fef9c3; --bdg-gd-border: #eab308;
+            --bdg-sv-bg: linear-gradient(135deg, #71717a 0%, #27272a 100%); --bdg-sv-text: #f4f4f5; --bdg-sv-border: #a1a1aa;
+            --bdg-bz-bg: linear-gradient(135deg, #9a3412 0%, #431407 100%); --bdg-bz-text: #ffedd5; --bdg-bz-border: #d97706;
+            --bdg-st-bg: #27272a; --bdg-st-text: #a1a1aa; --bdg-st-border: #3f3f46;
+        }
+
+        /* 80 PLUS 金屬標章 (預設為亮色極簡淨白版，透過 CSS 變數支援切換) */
+        .badge-titanium { background: var(--bdg-ti-bg, linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 50%, #94a3b8 100%)); color: var(--bdg-ti-text, #0f172a); border: 1px solid var(--bdg-ti-border, #e2e8f0); }
+        .badge-platinum { background: var(--bdg-pl-bg, linear-gradient(135deg, #f0f9ff 0%, #bae6fd 50%, #38bdf8 100%)); color: var(--bdg-pl-text, #082f49); border: 1px solid var(--bdg-pl-border, #e0f2fe); }
+        .badge-gold { background: var(--bdg-gd-bg, linear-gradient(135deg, #fefce8 0%, #fde047 50%, #eab308 100%)); color: var(--bdg-gd-text, #713f12); border: 1px solid var(--bdg-gd-border, #fef08a); }
+        .badge-silver { background: var(--bdg-sv-bg, linear-gradient(135deg, #ffffff 0%, #e5e7eb 50%, #d1d5db 100%)); color: var(--bdg-sv-text, #1f2937); border: 1px solid var(--bdg-sv-border, #f3f4f6); }
+        .badge-bronze { background: var(--bdg-bz-bg, linear-gradient(135deg, #ffedd5 0%, #fdba74 50%, #f97316 100%)); color: var(--bdg-bz-text, #7c2d12); border: 1px solid var(--bdg-bz-border, #fed7aa); }
+        .badge-standard { background: var(--bdg-st-bg, #f8fafc); color: var(--bdg-st-text, #475569); border: 1px solid var(--bdg-st-border, #cbd5e1); }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
@@ -421,7 +439,10 @@
                 modal_notes: "特別要求 / 其他",
                 modal_cancel: "取消",
                 modal_submit: "發送給 PM",
-                alert_required: "請填寫所有標示 * 的必填欄位。"
+                alert_required: "請填寫所有標示 * 的必填欄位。",
+                data_Full_Modular: "全模組",
+                data_Direct_Cable: "直出",
+                data_Semi_Modular: "半模組"
             },
             en: {
                 title: "PC PSU Selector",
@@ -467,7 +488,10 @@
                 modal_notes: "Special Requirements / Others",
                 modal_cancel: "Cancel",
                 modal_submit: "Send to PM",
-                alert_required: "Please fill in all required fields marked with *."
+                alert_required: "Please fill in all required fields marked with *.",
+                data_Full_Modular: "Full Modular",
+                data_Direct_Cable: "Direct Cable",
+                data_Semi_Modular: "Semi Modular"
             }
         };
 
@@ -567,6 +591,13 @@
             if (!document.getElementById('results-area').classList.contains('hidden')) renderResults();
         }
 
+        // 資料值翻譯轉換
+        function tData(val) {
+            if (!val) return '-';
+            const key = 'data_' + val.toString().replace(/\s+/g, '_');
+            return i18n[currentLang][key] || val;
+        }
+
         // =========================
         // 表單視窗 Modal 邏輯
         // =========================
@@ -577,7 +608,7 @@
             const lang = i18n[currentLang];
             for(let key in selectedFilters) {
                 let catLabel = lang['cat_' + key] || key;
-                let val = selectedFilters[key] === 'V' ? 'Yes' : selectedFilters[key];
+                let val = selectedFilters[key] === 'V' ? 'Yes' : tData(selectedFilters[key]);
                 specs.push(`[${catLabel}] ${val}`);
             }
             if (selectedWattageRange && !selectedFilters['Wattage_W']) {
@@ -778,7 +809,7 @@
                             
                             btn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
                             btn.disabled = !isActive && !isAvailable;
-                            btn.innerText = opt;
+                            btn.innerText = tData(opt);
                             btn.onclick = () => {
                                 if (isActive) { selectedInputVoltage1 = null; delete selectedFilters['Input_Voltage_2']; }
                                 else { selectedInputVoltage1 = opt; delete selectedFilters['Input_Voltage_2']; expandedCategories.add(cat.key); let matchingL3 = temp.filter(i => i['Input_Voltage'] === opt).map(i => i['Input_Voltage_2']).filter(v => v); let uniqueL3 = [...new Set(matchingL3)]; if (uniqueL3.length === 1) selectedFilters['Input_Voltage_2'] = uniqueL3[0]; }
@@ -798,7 +829,7 @@
                                 const btn = document.createElement('button');
                                 btn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
                                 btn.disabled = !isActive && !isAvailable;
-                                btn.innerText = opt;
+                                btn.innerText = tData(opt);
                                 btn.onclick = () => { if (isActive) delete selectedFilters['Input_Voltage_2']; else selectedFilters['Input_Voltage_2'] = opt; updateLogic(); renderFilterUI(); };
                                 optionsDiv.appendChild(btn);
                             });
@@ -841,7 +872,7 @@
                             const optBtn = document.createElement('button');
                             optBtn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
                             optBtn.disabled = !isActive && !isAvailable;
-                            optBtn.innerText = opt;
+                            optBtn.innerText = tData(opt);
                             optBtn.onclick = () => { if (isActive) delete selectedFilters[cat.key]; else selectedFilters[cat.key] = opt; updateLogic(); renderFilterUI(); };
                             optionsDiv.appendChild(optBtn);
                         });
@@ -998,26 +1029,26 @@
                         <div class="flex flex-col items-center justify-center p-3 t-tag-internal rounded-xl text-center">
                             <i data-lucide="cable" class="w-5 h-5 t-icon-color mb-1.5"></i>
                             <span class="text-[12px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_modular}</span>
-                            <span class="text-sm font-bold t-text-main truncate w-full px-1">${item.Modular_Type || '-'}</span>
+                            <span class="text-sm font-bold t-text-main truncate w-full px-1">${tData(item.Modular_Type)}</span>
                         </div>
                         <div class="flex flex-col items-center justify-center p-3 t-tag-internal rounded-xl text-center">
                             <i data-lucide="cpu" class="w-5 h-5 t-icon-color mb-1.5"></i>
-                            <span class="text-[10px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_ports}</span>
+                            <span class="text-[12px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_ports}</span>
                             <span class="text-sm font-bold t-text-main">${item['12V_2x6_Ports'] > 0 ? item['12V_2x6_Ports'] + lang.unit_ports : lang.val_none}</span>
                         </div>
                         <div class="flex flex-col items-center justify-center p-3 t-tag-internal rounded-xl text-center">
                             <i data-lucide="plug" class="w-5 h-5 t-icon-color mb-1.5"></i>
-                            <span class="text-[10px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_voltage}</span>
+                            <span class="text-[12px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_voltage}</span>
                             <span class="text-sm font-bold t-text-main">${item.Input_Voltage_2 || '-'}</span>
                         </div>
                         <div class="flex flex-col items-center justify-center p-3 t-tag-internal rounded-xl text-center">
                             <div class="flex gap-2 mb-1.5"><i data-lucide="thermometer" class="w-4 h-4 t-icon-color"></i><i data-lucide="mountain" class="w-4 h-4 t-icon-color"></i></div>
-                            <span class="text-[10px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_env}</span>
+                            <span class="text-[12px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_env}</span>
                             <span class="text-xs font-bold t-text-main leading-tight">${item.Working_Temp || '-'}<br>${item.Operating_Altitude || '-'}</span>
                         </div>
                     </div>
 
-                    <div class="mt-auto flex items-center gap-2 text-[11px] t-tag-internal p-2.5 rounded-lg border">
+                    <div class="mt-auto flex items-center gap-2 text-[12px] t-tag-internal p-2.5 rounded-lg border">
                         <i data-lucide="layout-template" class="w-3.5 h-3.5 t-text-muted"></i>
                         <div>
                             <span class="font-bold t-text-muted uppercase tracking-tight">${lang.label_dimensions}:</span> 
