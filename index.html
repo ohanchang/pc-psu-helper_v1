@@ -3,75 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PC 電源供應器選購助手 | Visualized Edition</title>
+    <title>PC 電源供應器選購助手 | Theme Evaluation Engine</title>
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 PapaParse -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- 引入 Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        body {
-            background-color: #f8fafc;
-            color: #334155;
-        }
-        
-        .glass-panel {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        /* =========================================
+           主題引擎 (Theme Engine) - CSS 變數定義
+           ========================================= */
+        :root, [data-theme="light"] {
+            --bg-body: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --panel-bg: #ffffff;
+            --panel-border: #e2e8f0;
+            --panel-radius: 1rem;
+            --card-radius: 1rem;
+            --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --accent: #2563eb;
+            --accent-text: #ffffff;
+            --btn-active-bg: #2563eb;
+            --btn-active-text: #ffffff;
+            --btn-avail-bg: #ffffff;
+            --btn-avail-text: #334155;
+            --btn-disabled-bg: #f8fafc;
+            --btn-disabled-text: #94a3b8;
+            --badge-cp-bg: linear-gradient(135deg, #fb923c, #ea580c);
+            --font-family: ui-sans-serif, system-ui, sans-serif;
+            --ff-atx: #3b82f6;
+            --ff-sfx: #a855f7;
+            --ff-tfx: #10b981;
         }
 
-        .options-container {
-            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, margin-top 0.3s ease-in-out;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            margin-top: 0;
+        [data-theme="cyberpunk"] {
+            --bg-body: #09090b;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --panel-bg: rgba(20, 0, 30, 0.8);
+            --panel-border: #c026d3; /* Fuchsia */
+            --panel-radius: 0.25rem;
+            --card-radius: 0.25rem;
+            --card-hover-shadow: 0 0 20px rgba(192, 38, 211, 0.4);
+            --accent: #06b6d4; /* Cyan */
+            --accent-text: #000000;
+            --btn-active-bg: #06b6d4;
+            --btn-active-text: #000000;
+            --btn-avail-bg: #18181b;
+            --btn-avail-text: #d4d4d8;
+            --btn-disabled-bg: #09090b;
+            --btn-disabled-text: #52525b;
+            --badge-cp-bg: linear-gradient(135deg, #d946ef, #ec4899);
+            --font-family: 'Courier New', Courier, monospace;
+            --ff-atx: #06b6d4;
+            --ff-sfx: #c026d3;
+            --ff-tfx: #ec4899;
         }
-        .options-container.expanded {
-            max-height: 800px;
-            opacity: 1;
-            margin-top: 0.75rem;
-            overflow: visible;
+
+        [data-theme="military"] {
+            --bg-body: #1c1c1a;
+            --text-main: #e5e5e0;
+            --text-muted: #8b8b83;
+            --panel-bg: #262624;
+            --panel-border: #4a4a45;
+            --panel-radius: 0;
+            --card-radius: 0;
+            --card-hover-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8);
+            --accent: #eab308; /* Hazard Yellow */
+            --accent-text: #000000;
+            --btn-active-bg: #eab308;
+            --btn-active-text: #000000;
+            --btn-avail-bg: #333330;
+            --btn-avail-text: #d4d4d0;
+            --btn-disabled-bg: #1c1c1a;
+            --btn-disabled-text: #5c5c56;
+            --badge-cp-bg: #b91c1c;
+            --font-family: Impact, Consolas, sans-serif;
+            --ff-atx: #eab308;
+            --ff-sfx: #eab308;
+            --ff-tfx: #eab308;
         }
+
+        [data-theme="oled"] {
+            --bg-body: #000000;
+            --text-main: #ffffff;
+            --text-muted: #71717a;
+            --panel-bg: #000000;
+            --panel-border: #27272a;
+            --panel-radius: 1rem;
+            --card-radius: 1rem;
+            --card-hover-shadow: 0 0 0 1px #52525b;
+            --accent: #ffffff;
+            --accent-text: #000000;
+            --btn-active-bg: #ffffff;
+            --btn-active-text: #000000;
+            --btn-avail-bg: #000000;
+            --btn-avail-text: #a1a1aa;
+            --btn-disabled-bg: #000000;
+            --btn-disabled-text: #3f3f46;
+            --badge-cp-bg: #18181b;
+            --font-family: ui-sans-serif, system-ui, sans-serif;
+            --ff-atx: #ffffff;
+            --ff-sfx: #ffffff;
+            --ff-tfx: #ffffff;
+        }
+
+        [data-theme="enterprise"] {
+            --bg-body: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --panel-bg: #ffffff;
+            --panel-border: #cbd5e1;
+            --panel-radius: 0.125rem;
+            --card-radius: 0.125rem;
+            --card-hover-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --accent: #0369a1; /* IBM Blue */
+            --accent-text: #ffffff;
+            --btn-active-bg: #e0f2fe;
+            --btn-active-text: #0369a1;
+            --btn-avail-bg: #ffffff;
+            --btn-avail-text: #334155;
+            --btn-disabled-bg: #f8fafc;
+            --btn-disabled-text: #94a3b8;
+            --badge-cp-bg: #f59e0b;
+            --font-family: Arial, Helvetica, sans-serif;
+            --ff-atx: #0369a1;
+            --ff-sfx: #475569;
+            --ff-tfx: #475569;
+        }
+
+        [data-theme="eco"] {
+            --bg-body: #fdfbf7;
+            --text-main: #292524;
+            --text-muted: #78716c;
+            --panel-bg: #ffffff;
+            --panel-border: #e7e5e4;
+            --panel-radius: 1.5rem; /* Pill-like */
+            --card-radius: 1.5rem;
+            --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            --accent: #10b981; /* Emerald */
+            --accent-text: #ffffff;
+            --btn-active-bg: #10b981;
+            --btn-active-text: #ffffff;
+            --btn-avail-bg: #ffffff;
+            --btn-avail-text: #44403c;
+            --btn-disabled-bg: #f5f5f4;
+            --btn-disabled-text: #a8a29e;
+            --badge-cp-bg: #84cc16;
+            --font-family: ui-sans-serif, system-ui, sans-serif;
+            --ff-atx: #10b981;
+            --ff-sfx: #14b8a6;
+            --ff-tfx: #84cc16;
+        }
+
+        /* =========================================
+           共用邏輯樣式類別 (取代寫死的 Tailwind 顏色)
+           ========================================= */
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .t-panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--panel-radius);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .t-card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--card-radius);
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+        }
+        .t-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--accent);
+        }
+
+        .t-btn-active {
+            background-color: var(--btn-active-bg) !important;
+            border-color: var(--accent) !important;
+            color: var(--btn-active-text) !important;
+            border-radius: var(--panel-radius);
+        }
+
+        .t-btn-avail {
+            background-color: var(--btn-avail-bg);
+            border-color: var(--panel-border);
+            color: var(--btn-avail-text);
+            border-radius: var(--panel-radius);
+        }
+        .t-btn-avail:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .t-btn-disabled {
+            background-color: var(--btn-disabled-bg);
+            border-color: var(--panel-border);
+            color: var(--btn-disabled-text);
+            border-radius: var(--panel-radius);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .t-text-main { color: var(--text-main); }
+        .t-text-muted { color: var(--text-muted); }
+        .t-accent { color: var(--accent); }
+        .t-accent-bg { background-color: var(--accent); color: var(--accent-text); }
+        .t-badge-cp { background: var(--badge-cp-bg); color: var(--accent-text); }
+
+        /* 特殊邊框與圖示對齊 */
+        .t-tag-internal { border: 1px solid var(--panel-border); background-color: transparent; }
+        .t-icon-color { color: var(--accent); }
+        .t-border-base { border-color: var(--panel-border); }
         
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* 80 PLUS 金屬光澤標章特效 */
-        .badge-titanium { background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 50%, #94a3b8 100%); color: #0f172a; border: 1px solid #e2e8f0; }
-        .badge-platinum { background: linear-gradient(135deg, #f0f9ff 0%, #bae6fd 50%, #38bdf8 100%); color: #082f49; border: 1px solid #e0f2fe; }
-        .badge-gold { background: linear-gradient(135deg, #fefce8 0%, #fde047 50%, #eab308 100%); color: #713f12; border: 1px solid #fef08a; }
-        .badge-silver { background: linear-gradient(135deg, #ffffff 0%, #e5e7eb 50%, #d1d5db 100%); color: #1f2937; border: 1px solid #f3f4f6; }
-        .badge-bronze { background: linear-gradient(135deg, #ffedd5 0%, #fdba74 50%, #f97316 100%); color: #7c2d12; border: 1px solid #fed7aa; }
-        .badge-standard { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: var(--panel-radius); }
+        
+        .options-container {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, margin-top 0.3s ease-in-out;
+            max-height: 0; opacity: 0; overflow: hidden; margin-top: 0;
+        }
+        .options-container.expanded { max-height: 800px; opacity: 1; margin-top: 0.75rem; overflow: visible; }
     </style>
 </head>
-<body class="font-sans min-h-screen p-4 md:p-8">
+<body class="min-h-screen p-4 md:p-8">
 
     <div class="max-w-5xl mx-auto">
+        <!-- 頂部 Header -->
         <header class="mb-10 text-center md:text-left">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div class="flex-grow">
-                    <h1 id="ui-title" class="text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">
+                    <h1 id="ui-title" class="text-3xl font-extrabold t-text-main mb-2 tracking-tight">
                         PC 電源供應器選購助手
                     </h1>
-                    <p id="ui-desc" class="text-slate-500">點擊類別展開選項，系統將為您即時篩選合適的電源。</p>
+                    <p id="ui-desc" class="t-text-muted">點擊類別展開選項，系統將為您即時篩選合適的電源。</p>
                     
-                    <div id="status-text-top" class="text-sm font-medium text-blue-700 mt-3 hidden px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 inline-block shadow-sm">
-                        <span id="ui-status-label-top">目前符合條件：</span><span id="result-count-top" class="font-bold text-lg text-blue-800 ml-1">0</span> <span id="ui-unit-top">款</span>
+                    <div id="status-text-top" class="text-sm font-bold mt-3 hidden px-4 py-1.5 t-panel inline-block">
+                        <span id="ui-status-label-top" class="t-text-muted">目前符合條件：</span>
+                        <span id="result-count-top" class="text-lg t-accent ml-1">0</span> 
+                        <span id="ui-unit-top" class="t-text-muted">款</span>
                     </div>
                 </div>
 
+                <!-- 右上角控制區 (語系、重置、主題切換) -->
                 <div class="flex flex-col items-end gap-3 z-10">
-                    <div class="flex items-center gap-3">
-                        <div class="flex bg-slate-200 p-1 rounded-lg shadow-inner">
-                            <button onclick="changeLang('tw')" id="lang-tw" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all bg-white text-slate-900 shadow-sm">TW</button>
-                            <button onclick="changeLang('en')" id="lang-en" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:text-slate-700">EN</button>
+                    <div class="flex flex-wrap items-center justify-end gap-3">
+                        <!-- 主題切換器 -->
+                        <select id="theme-selector" onchange="changeTheme(this.value)" class="t-btn-avail px-3 py-2 text-xs font-bold focus:outline-none border shadow-sm">
+                            <option value="light">極簡淨白 (Clean Light)</option>
+                            <option value="cyberpunk">電競霓虹 (Cyberpunk)</option>
+                            <option value="military">軍規重工 (Military)</option>
+                            <option value="oled">深空純黑 (OLED Dark)</option>
+                            <option value="enterprise">企業伺服器 (Enterprise)</option>
+                            <option value="eco">綠能環保 (Eco Sustainability)</option>
+                        </select>
+
+                        <!-- 語言切換器 -->
+                        <div class="flex t-panel p-1">
+                            <button onclick="changeLang('tw')" id="lang-tw" class="px-4 py-1.5 text-xs font-bold transition-all t-btn-active">TW</button>
+                            <button onclick="changeLang('en')" id="lang-en" class="px-4 py-1.5 text-xs font-bold transition-all t-btn-avail border-none">EN</button>
                         </div>
                         
-                        <button id="reset-btn" class="hidden px-4 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-lg border border-red-200 transition-all flex items-center gap-1.5 shadow-sm">
+                        <!-- 重新選取按鈕 -->
+                        <button id="reset-btn" class="hidden px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold rounded-lg border border-red-500/30 transition-all flex items-center gap-1.5">
                             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> <span id="ui-reset">重新選取</span>
                         </button>
                     </div>
@@ -79,87 +284,91 @@
             </div>
         </header>
 
-        <div id="filters-container" class="glass-panel rounded-2xl shadow-sm p-6 md:p-8 mb-8 min-h-[150px] relative">
-            <div id="loading-msg" class="absolute inset-0 flex items-center justify-center text-blue-600 animate-pulse font-medium">
+        <!-- 篩選器框架 -->
+        <div id="filters-container" class="t-panel p-6 md:p-8 mb-8 min-h-[150px] relative">
+            <div id="loading-msg" class="absolute inset-0 flex items-center justify-center t-accent animate-pulse font-bold tracking-widest">
                 <i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i> <span id="ui-loading">正在載入雲端資料庫...</span>
             </div>
         </div>
 
+        <!-- 底部狀態與展開按鈕 -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 min-h-[40px] gap-4">
-            <div id="status-text-bottom" class="text-sm font-medium text-slate-500 hidden">
-                <span id="ui-status-label-bottom">為您篩選出</span> <span id="result-count-bottom" class="text-blue-600 font-bold text-lg">0</span> <span id="ui-unit-bottom">款電源</span>
+            <div id="status-text-bottom" class="text-sm font-bold t-text-muted hidden">
+                <span id="ui-status-label-bottom">為您篩選出</span> <span id="result-count-bottom" class="t-accent text-lg mx-1">0</span> <span id="ui-unit-bottom">款電源</span>
             </div>
-            <button id="show-results-btn" class="hidden px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all border border-transparent shadow-md ml-auto flex items-center gap-2">
+            <button id="show-results-btn" class="hidden px-8 py-3 t-accent-bg font-bold transition-all ml-auto flex items-center gap-2 rounded-xl">
                 <i data-lucide="zap" class="w-5 h-5"></i> <span id="ui-expand">展開篩選結果</span>
             </button>
         </div>
 
+        <!-- 結果區域 -->
         <div id="results-area" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 pb-8">
-            </div>
+        </div>
 
-        <div id="bottom-inquiry-container" class="hidden pb-20 pt-8 border-t border-slate-200 mt-4 flex flex-col items-center">
-            <p id="ui-inquiry-hint" class="text-sm text-slate-500 mb-3">以上都不符合您的系統需求？</p>
-            <button onclick="openInquiryModal()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 text-sm">
+        <div id="bottom-inquiry-container" class="hidden pb-20 pt-8 border-t t-border-base mt-4 flex flex-col items-center">
+            <p id="ui-inquiry-hint" class="text-sm t-text-muted mb-3 font-bold">以上都不符合您的系統需求？</p>
+            <button onclick="openInquiryModal()" class="px-6 py-2.5 t-accent-bg font-bold transition-all shadow-md flex items-center gap-2 text-sm rounded-xl">
                 <i data-lucide="mail-plus" class="w-4 h-4"></i> <span id="ui-inquiry-btn">告訴我們您的特殊需求</span>
             </button>
         </div>
     </div>
 
-    <div id="inquiry-modal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity opacity-0">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300" id="inquiry-modal-content">
-            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50">
-                <h2 id="ui-modal-title" class="text-lg font-extrabold text-slate-800">向 PM 提出客製化需求</h2>
-                <button onclick="closeInquiryModal()" class="text-slate-400 hover:text-slate-600 transition-colors p-1">
+    <!-- 彈出視窗：需求訪談表單 -->
+    <div id="inquiry-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity opacity-0">
+        <div class="t-panel w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300" id="inquiry-modal-content">
+            <div class="flex justify-between items-center px-6 py-4 border-b t-border-base bg-black/5">
+                <h2 id="ui-modal-title" class="text-lg font-extrabold t-text-main">向 PM 提出客製化需求</h2>
+                <button onclick="closeInquiryModal()" class="t-text-muted hover:text-red-500 transition-colors p-1">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
             
             <div class="p-6 overflow-y-auto max-h-[70vh]">
-                <div class="mb-5 p-4 bg-blue-50 border border-blue-100 rounded-xl">
-                    <h3 id="ui-modal-specs-title" class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2">您目前尋找的規格：</h3>
-                    <p id="inq-specs-text" class="text-sm text-blue-900 leading-relaxed font-medium whitespace-pre-wrap"></p>
+                <div class="mb-5 p-4 t-tag-internal rounded-xl bg-black/5">
+                    <h3 id="ui-modal-specs-title" class="text-xs font-bold t-accent uppercase tracking-wider mb-2">您目前尋找的規格：</h3>
+                    <p id="inq-specs-text" class="text-sm t-text-main leading-relaxed font-medium whitespace-pre-wrap"></p>
                 </div>
 
                 <div class="space-y-4">
                     <div>
-                        <label id="ui-modal-name" class="block text-sm font-bold text-slate-700 mb-1">客戶名稱 <span class="text-red-500">*</span></label>
-                        <input type="text" id="inq-name" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+                        <label id="ui-modal-name" class="block text-sm font-bold t-text-main mb-1">客戶名稱 *</label>
+                        <input type="text" id="inq-name" class="w-full border t-border-base rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-transparent t-text-main">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label id="ui-modal-annual" class="block text-sm font-bold text-slate-700 mb-1">年需求數量 <span class="text-red-500">*</span></label>
-                            <input type="number" id="inq-annual" min="0" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+                            <label id="ui-modal-annual" class="block text-sm font-bold t-text-main mb-1">年需求數量 *</label>
+                            <input type="number" id="inq-annual" min="0" class="w-full border t-border-base rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-transparent t-text-main">
                         </div>
                         <div>
-                            <label id="ui-modal-monthly" class="block text-sm font-bold text-slate-700 mb-1">月需求數量 <span class="text-red-500">*</span></label>
-                            <input type="number" id="inq-monthly" min="0" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+                            <label id="ui-modal-monthly" class="block text-sm font-bold t-text-main mb-1">月需求數量 *</label>
+                            <input type="number" id="inq-monthly" min="0" class="w-full border t-border-base rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-transparent t-text-main">
                         </div>
                     </div>
                     <div>
-                        <label id="ui-modal-leadtime" class="block text-sm font-bold text-slate-700 mb-2">交期與狀態 <span class="text-red-500">*</span></label>
+                        <label id="ui-modal-leadtime" class="block text-sm font-bold t-text-main mb-2">交期與狀態 *</label>
                         <div class="flex flex-col gap-2.5">
-                            <label class="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer p-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                                <input type="radio" name="inq-leadtime" value="A" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-slate-300">
+                            <label class="flex items-center gap-2.5 text-sm t-text-main cursor-pointer p-2 border t-border-base rounded-lg hover:bg-black/5 transition-colors">
+                                <input type="radio" name="inq-leadtime" value="A" class="w-4 h-4">
                                 <span id="ui-modal-npi">可等待新產品開發</span>
                             </label>
-                            <label class="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer p-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                                <input type="radio" name="inq-leadtime" value="B" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-slate-300">
+                            <label class="flex items-center gap-2.5 text-sm t-text-main cursor-pointer p-2 border t-border-base rounded-lg hover:bg-black/5 transition-colors">
+                                <input type="radio" name="inq-leadtime" value="B" class="w-4 h-4">
                                 <span id="ui-modal-mp">需量產機型立即出貨</span>
                             </label>
                         </div>
                     </div>
                     <div>
-                        <label id="ui-modal-notes" class="block text-sm font-bold text-slate-700 mb-1">特別要求 / 其他</label>
-                        <textarea id="inq-notes" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-shadow" placeholder="請簡述您的應用場景或特殊認證需求..."></textarea>
+                        <label id="ui-modal-notes" class="block text-sm font-bold t-text-main mb-1">特別要求 / 其他</label>
+                        <textarea id="inq-notes" rows="3" class="w-full border t-border-base rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-transparent t-text-main resize-none"></textarea>
                     </div>
                 </div>
             </div>
             
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-                <button onclick="closeInquiryModal()" id="ui-modal-cancel" class="px-5 py-2 text-sm font-bold text-slate-600 hover:text-slate-800 transition-colors">
+            <div class="px-6 py-4 border-t t-border-base bg-black/5 flex justify-end gap-3">
+                <button onclick="closeInquiryModal()" id="ui-modal-cancel" class="px-5 py-2 text-sm font-bold t-text-muted hover:text-red-500 transition-colors">
                     取消
                 </button>
-                <button onclick="submitInquiry()" id="ui-modal-submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-md transition-colors flex items-center gap-2">
+                <button onclick="submitInquiry()" id="ui-modal-submit" class="px-6 py-2 t-accent-bg text-sm font-bold rounded-lg shadow-md transition-colors flex items-center gap-2">
                     <i data-lucide="send" class="w-4 h-4"></i> 發送給 PM
                 </button>
             </div>
@@ -195,7 +404,7 @@
                 label_voltage: "輸入電壓",
                 label_env: "環境耐受",
                 label_dimensions: "產品尺寸 (L*W*H)",
-                cp_badge: "C/P 值之王",
+                cp_badge: "C/P 首選",
                 unit_ports: "組",
                 val_none: "無",
                 inquiry_hint: "以上都不符合您的系統需求？",
@@ -263,6 +472,7 @@
         };
 
         let currentLang = 'tw'; 
+        let currentTheme = 'light'; // 預設極簡淨白
 
         const DATA_SOURCE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZx7dFscS4QzuHlmZTJrYCqXTtSIf4vR-aqr4dIai7cTLfycA1MQA85Q09dj3jXUwwNCdwYn9nFNuL/pub?output=csv';
 
@@ -303,25 +513,30 @@
             });
 
             document.getElementById('reset-btn').addEventListener('click', () => {
-                selectedFilters = {};
-                expandedCategories = new Set();
-                selectedWattageRange = null;
-                selectedInputVoltage1 = null;
-                updateLogic();
-                renderFilterUI();
+                selectedFilters = {}; expandedCategories = new Set();
+                selectedWattageRange = null; selectedInputVoltage1 = null;
+                updateLogic(); renderFilterUI();
             });
         });
 
+        // 主題切換引擎
+        function changeTheme(theme) {
+            currentTheme = theme;
+            document.body.setAttribute('data-theme', theme);
+            // 由於使用 CSS 變數，不需要重繪畫面，DOM 會立刻套用新屬性
+        }
+
+        // 語系切換引擎
         function changeLang(lang) {
             currentLang = lang;
             const btnTw = document.getElementById('lang-tw');
             const btnEn = document.getElementById('lang-en');
             if (lang === 'tw') {
-                btnTw.className = 'px-4 py-1.5 text-xs font-bold rounded-md transition-all bg-white text-slate-900 shadow-sm';
-                btnEn.className = 'px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:text-slate-700';
+                btnTw.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-active';
+                btnEn.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-avail border-none';
             } else {
-                btnEn.className = 'px-4 py-1.5 text-xs font-bold rounded-md transition-all bg-white text-slate-900 shadow-sm';
-                btnTw.className = 'px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:text-slate-700';
+                btnEn.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-active';
+                btnTw.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-avail border-none';
             }
             
             const textUpdates = [
@@ -340,7 +555,7 @@
             textUpdates.forEach(item => {
                 const el = document.getElementById(item.id);
                 if (el) {
-                    if (item.key.includes('modal_name') || item.key.includes('annual') || item.key.includes('monthly') || item.key.includes('leadtime')) {
+                    if (['modal_name', 'modal_annual', 'modal_monthly', 'modal_leadtime'].includes(item.key)) {
                         el.innerHTML = i18n[lang][item.key].replace('*', '<span class="text-red-500">*</span>');
                     } else {
                         el.innerText = i18n[lang][item.key];
@@ -352,13 +567,14 @@
             if (!document.getElementById('results-area').classList.contains('hidden')) renderResults();
         }
 
+        // =========================
+        // 表單視窗 Modal 邏輯
+        // =========================
         function openInquiryModal() {
             const modal = document.getElementById('inquiry-modal');
             const content = document.getElementById('inquiry-modal-content');
-            
             let specs = [];
             const lang = i18n[currentLang];
-            
             for(let key in selectedFilters) {
                 let catLabel = lang['cat_' + key] || key;
                 let val = selectedFilters[key] === 'V' ? 'Yes' : selectedFilters[key];
@@ -371,7 +587,6 @@
             if (selectedInputVoltage1 && !selectedFilters['Input_Voltage_2']) {
                 specs.push(`[${lang['cat_Input_Voltage_Group']}] ${selectedInputVoltage1}`);
             }
-            
             const specsText = specs.length > 0 ? specs.join('\n') : (currentLang === 'tw' ? "未指定條件" : "No specific conditions");
             document.getElementById('inq-specs-text').innerText = specsText;
 
@@ -386,108 +601,72 @@
         function closeInquiryModal() {
             const modal = document.getElementById('inquiry-modal');
             const content = document.getElementById('inquiry-modal-content');
-            
             modal.classList.add('opacity-0');
             content.classList.remove('scale-100');
             content.classList.add('scale-95');
-            
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
-        // 修改後的發信功能 (中英雙語版本)
         function submitInquiry() {
             const lang = i18n[currentLang];
-            
             const name = document.getElementById('inq-name').value.trim();
             const annual = document.getElementById('inq-annual').value.trim();
             const monthly = document.getElementById('inq-monthly').value.trim();
             const leadtimeObj = document.querySelector('input[name="inq-leadtime"]:checked');
             const notes = document.getElementById('inq-notes').value.trim();
 
-            if(!name || !annual || !monthly || !leadtimeObj) {
-                alert(lang.alert_required);
-                return;
-            }
+            if(!name || !annual || !monthly || !leadtimeObj) { alert(lang.alert_required); return; }
 
-            // 抓取中英文狀態
             const leadtimeValTw = leadtimeObj.value === 'A' ? "可等待新產品開發" : "需量產機型立即出貨";
             const leadtimeValEn = leadtimeObj.value === 'A' ? "Can wait for NPI" : "Need MP model immediately";
             const filterText = document.getElementById('inq-specs-text').innerText;
 
             const subject = encodeURIComponent("PC PSU 客製化需求詢價 / Customization Request");
             const body = encodeURIComponent(
-                `【客戶基本資訊 / Customer Info】\n` +
-                `客戶名稱 / Name: ${name}\n` +
-                `年需求數量 / Annual Demand: ${annual}\n` +
-                `月需求數量 / Monthly Demand: ${monthly}\n` +
-                `交期與狀態 / Lead Time & Status: ${leadtimeValTw} (${leadtimeValEn})\n\n` +
-                `【特別要求與其他 / Special Requirements & Others】\n` +
-                `${notes || '無 / None'}\n\n` +
-                `------------------------\n` +
-                `【已選取的技術規格參考 / Targeted Specs Reference】\n` +
-                `${filterText}`
+                `【客戶基本資訊 / Customer Info】\n客戶名稱 / Name: ${name}\n年需求數量 / Annual Demand: ${annual}\n月需求數量 / Monthly Demand: ${monthly}\n交期與狀態 / Lead Time & Status: ${leadtimeValTw} (${leadtimeValEn})\n\n【特別要求與其他 / Special Requirements & Others】\n${notes || '無 / None'}\n\n------------------------\n【已選取的技術規格參考 / Targeted Specs Reference】\n${filterText}`
             );
 
-            window.location.href = `mailto:hansou@fsp-group.com.tw?subject=${subject}&body=${body}`;
+            window.location.href = `mailto:test123@gmail.com?subject=${subject}&body=${body}`;
             
-            document.getElementById('inq-name').value = '';
-            document.getElementById('inq-annual').value = '';
-            document.getElementById('inq-monthly').value = '';
-            if(leadtimeObj) leadtimeObj.checked = false;
-            document.getElementById('inq-notes').value = '';
-            closeInquiryModal();
+            document.getElementById('inq-name').value = ''; document.getElementById('inq-annual').value = '';
+            document.getElementById('inq-monthly').value = ''; if(leadtimeObj) leadtimeObj.checked = false;
+            document.getElementById('inq-notes').value = ''; closeInquiryModal();
         }
 
-        // 統一共用的自定義選項排序函數
         function sortCategoryOptions(options, categoryKey) {
             if (categoryKey === 'Wattage_W') {
                 return options.sort((a, b) => parseInt(a) - parseInt(b));
             } else if (categoryKey === 'Efficiency_Level') {
-                // 特製的效率等級排序邏輯 (註：已補上金牌避免潛在的遺漏錯誤)
-                const effOrder = [
-                    "Titanium", "Platinum", "Gold", "Silver", "Bronze", "Standard", "Non-80",
-                    "230V EU Titanium", "230V EU Platinum", "230V EU Gold", "230V EU Silver", "230V EU Bronze", "230V EU Standard"
-                ];
+                const effOrder = ["Titanium", "Platinum", "Gold", "Silver", "Bronze", "Standard", "Non-80", "230V EU Titanium", "230V EU Platinum", "230V EU Gold", "230V EU Silver", "230V EU Bronze", "230V EU Standard"];
                 return options.sort((a, b) => {
                     let idxA = effOrder.findIndex(o => a === o || a.includes(o));
                     let idxB = effOrder.findIndex(o => b === o || b.includes(o));
-                    
-                    // 如果找不到對應的字串，將它放到最後面
-                    idxA = idxA === -1 ? 999 : idxA;
-                    idxB = idxB === -1 ? 999 : idxB;
-                    
+                    idxA = idxA === -1 ? 999 : idxA; idxB = idxB === -1 ? 999 : idxB;
                     if (idxA === idxB) return a.localeCompare(b);
                     return idxA - idxB;
                 });
-            } else {
-                return options.sort();
-            }
+            } else { return options.sort(); }
         }
 
         function loadDataFromURL() {
             Papa.parse(DATA_SOURCE_URL, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
+                download: true, header: true, skipEmptyLines: true,
                 complete: function(results) {
                     allData = results.data;
                     const loadingMsg = document.getElementById('loading-msg');
                     if (loadingMsg) loadingMsg.style.display = 'none';
-                    initFilterUI(); 
-                    updateLogic();  
-                    renderFilterUI(); 
+                    initFilterUI(); updateLogic(); renderFilterUI(); 
                 },
                 error: function(err) {
                     const container = document.getElementById('filters-container');
-                    if (container) {
-                        container.innerHTML = `<div class="text-red-400 text-center p-4 bg-red-900/20 rounded-xl border border-red-500/30"><strong>Data Load Error!</strong><br>${err.message || 'Cannot read CSV file'}</div>`;
-                    }
+                    if (container) { container.innerHTML = `<div class="text-red-500 font-bold p-4">Data Load Error: ${err.message}</div>`; }
                 }
             });
         }
 
+        // ==========================================
+        // UI 生成與更新 (使用 CSS Utilities 以支援切換)
+        // ==========================================
         function initFilterUI() {
             const container = document.getElementById('filters-container');
             if (!container) return;
@@ -495,15 +674,13 @@
             CATEGORIES.forEach(cat => {
                 const rowDiv = document.createElement('div');
                 rowDiv.id = `cat-row-${cat.key}`;
-                rowDiv.className = 'hidden flex-col items-start w-full py-4 border-b border-slate-100 last:border-0';
+                rowDiv.className = 'hidden flex-col items-start w-full py-4 border-b t-border-base last:border-0';
                 if (cat.type === 'toggle') {
                     const toggleBtn = document.createElement('button');
                     toggleBtn.id = `cat-toggle-${cat.key}`;
                     toggleBtn.onclick = () => {
-                        if (selectedFilters[cat.key]) delete selectedFilters[cat.key];
-                        else selectedFilters[cat.key] = cat.toggleValue;
-                        updateLogic();
-                        renderFilterUI();
+                        if (selectedFilters[cat.key]) delete selectedFilters[cat.key]; else selectedFilters[cat.key] = cat.toggleValue;
+                        updateLogic(); renderFilterUI();
                     };
                     rowDiv.appendChild(toggleBtn);
                 } else {
@@ -511,15 +688,11 @@
                     headerBtn.id = `cat-header-${cat.key}`;
                     headerBtn.onclick = () => {
                         if (expandedCategories.has(cat.key)) {
-                            expandedCategories.delete(cat.key);
-                            delete selectedFilters[cat.key];
+                            expandedCategories.delete(cat.key); delete selectedFilters[cat.key];
                             if (cat.key === 'Wattage_W') selectedWattageRange = null;
                             if (cat.key === 'Input_Voltage_Group') { selectedInputVoltage1 = null; delete selectedFilters['Input_Voltage_2']; }
-                        } else {
-                            expandedCategories.add(cat.key);
-                        }
-                        updateLogic();
-                        renderFilterUI();
+                        } else { expandedCategories.add(cat.key); }
+                        updateLogic(); renderFilterUI();
                     };
                     rowDiv.appendChild(headerBtn);
                     const optionsDiv = document.createElement('div');
@@ -543,25 +716,19 @@
                     let temp = getTempFiltered([cat.key]);
                     let hasValidItems = temp.some(item => item[cat.key] === cat.toggleValue);
                     let isSelected = selectedFilters[cat.key] === cat.toggleValue;
+                    if (temp.length >= 20) { rowDiv.classList.add('hidden'); rowDiv.classList.remove('flex'); return; }
                     
-                    if (temp.length >= 20) { 
-                        rowDiv.classList.add('hidden'); 
-                        rowDiv.classList.remove('flex'); 
-                        return; 
-                    }
-                    
-                    rowDiv.classList.remove('hidden'); 
-                    rowDiv.classList.add('flex');
+                    rowDiv.classList.remove('hidden'); rowDiv.classList.add('flex');
                     const toggleBtn = document.getElementById(`cat-toggle-${cat.key}`);
                     if (toggleBtn) {
                         if (isSelected) {
-                            toggleBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 bg-orange-500 border-orange-600 text-white shadow-sm`;
+                            toggleBtn.className = `shrink-0 px-5 py-2.5 font-bold text-sm transition-all border flex items-center gap-2 t-btn-active`;
                             toggleBtn.disabled = false;
                         } else if (hasValidItems) {
-                            toggleBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 bg-white border-slate-300 text-slate-700 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 cursor-pointer`;
+                            toggleBtn.className = `shrink-0 px-5 py-2.5 font-bold text-sm transition-all border flex items-center gap-2 t-btn-avail`;
                             toggleBtn.disabled = false;
                         } else {
-                            toggleBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
+                            toggleBtn.className = `shrink-0 px-5 py-2.5 font-bold text-sm transition-all border flex items-center gap-2 t-btn-disabled`;
                             toggleBtn.disabled = true;
                         }
                         toggleBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i> ${isSelected ? `✓ ${catLabel}` : catLabel}`;
@@ -569,10 +736,8 @@
                     return; 
                 }
 
-                let allPossibleOptions = [];
-                let allPossibleL2Options = [];
-                let availableOptions = [];
-                let availableL2Options = [];
+                let allPossibleOptions = []; let allPossibleL2Options = [];
+                let availableOptions = []; let availableL2Options = [];
                 
                 if (cat.type === 'group_2_levels') {
                     allPossibleL2Options = [...new Set(allData.map(i => i['Input_Voltage']).filter(v => v))];
@@ -586,20 +751,17 @@
                 if (cat.type === 'group_2_levels') {
                     let temp = getTempFiltered(['Input_Voltage_Group']);
                     availableL2Options = [...new Set(temp.map(i => i['Input_Voltage']).filter(v => v))];
-                } else {
-                    availableOptions = getAvailableOptionsForCategory(cat.key);
-                }
+                } else { availableOptions = getAvailableOptionsForCategory(cat.key); }
 
-                rowDiv.classList.remove('hidden'); 
-                rowDiv.classList.add('flex');
+                rowDiv.classList.remove('hidden'); rowDiv.classList.add('flex');
                 
                 const isExpanded = expandedCategories.has(cat.key);
                 const isSelected = selectedFilters[cat.key] !== undefined || (cat.key === 'Wattage_W' && selectedWattageRange !== null) || (cat.key === 'Input_Voltage_Group' && (selectedInputVoltage1 !== null || selectedFilters['Input_Voltage_2'] !== undefined));
                 
                 const headerBtn = document.getElementById(`cat-header-${cat.key}`);
                 if (headerBtn) {
-                    headerBtn.className = `shrink-0 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border flex items-center gap-2 ${isExpanded || isSelected ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm' : 'bg-transparent border-transparent text-slate-600 hover:bg-slate-50'}`;
-                    headerBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4 ${isSelected ? 'text-blue-600' : ''}"></i> ${catLabel}`;
+                    headerBtn.className = `shrink-0 px-5 py-2.5 font-bold text-sm transition-all border flex items-center gap-2 ${isExpanded || isSelected ? 't-btn-active' : 't-btn-avail border-transparent bg-transparent'}`;
+                    headerBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i> ${catLabel}`;
                 }
                 
                 const optionsDiv = document.getElementById(`cat-options-${cat.key}`);
@@ -609,23 +771,13 @@
                     
                     if (cat.type === 'group_2_levels') {
                         let temp = getTempFiltered(['Input_Voltage_Group']); 
-                        
                         allPossibleL2Options.forEach(opt => {
                             const isAvailable = availableL2Options.includes(opt);
                             const isActive = selectedInputVoltage1 === opt;
                             const btn = document.createElement('button');
                             
-                            if (isActive) {
-                                btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-teal-600 border-teal-600 text-white shadow-sm`;
-                                btn.disabled = false;
-                            } else if (isAvailable) {
-                                btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 cursor-pointer`;
-                                btn.disabled = false;
-                            } else {
-                                btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
-                                btn.disabled = true;
-                            }
-                            
+                            btn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
+                            btn.disabled = !isActive && !isAvailable;
                             btn.innerText = opt;
                             btn.onclick = () => {
                                 if (isActive) { selectedInputVoltage1 = null; delete selectedFilters['Input_Voltage_2']; }
@@ -636,11 +788,7 @@
                         });
 
                         if (selectedInputVoltage1) {
-                            const separator = document.createElement('span'); 
-                            separator.className = 'text-slate-400 mx-1 text-sm font-bold'; 
-                            separator.innerText = '>'; 
-                            optionsDiv.appendChild(separator);
-                            
+                            const separator = document.createElement('span'); separator.className = 't-text-muted mx-1 text-sm font-bold'; separator.innerText = '>'; optionsDiv.appendChild(separator);
                             let allPossibleL3Options = [...new Set(allData.filter(i => i['Input_Voltage'] === selectedInputVoltage1).map(i => i['Input_Voltage_2']).filter(v => v))];
                             let availableL3Options = [...new Set(temp.filter(i => i['Input_Voltage'] === selectedInputVoltage1).map(i => i['Input_Voltage_2']).filter(v => v))];
 
@@ -648,18 +796,8 @@
                                 const isAvailable = availableL3Options.includes(opt);
                                 const isActive = selectedFilters['Input_Voltage_2'] === opt;
                                 const btn = document.createElement('button');
-                                
-                                if (isActive) {
-                                    btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-blue-600 border-blue-600 text-white shadow-sm`;
-                                    btn.disabled = false;
-                                } else if (isAvailable) {
-                                    btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 cursor-pointer`;
-                                    btn.disabled = false;
-                                } else {
-                                    btn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
-                                    btn.disabled = true;
-                                }
-
+                                btn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
+                                btn.disabled = !isActive && !isAvailable;
                                 btn.innerText = opt;
                                 btn.onclick = () => { if (isActive) delete selectedFilters['Input_Voltage_2']; else selectedFilters['Input_Voltage_2'] = opt; updateLogic(); renderFilterUI(); };
                                 optionsDiv.appendChild(btn);
@@ -670,52 +808,26 @@
                         WATTAGE_RANGES.forEach(range => {
                             let hasDataInAll = allPossibleOptions.some(opt => { let w = parseInt(opt) || 0; return w >= range.min && w <= range.max; });
                             if (!hasDataInAll && selectedWattageRange !== range.id) return; 
-                            
                             let isAvailable = availableOptions.some(opt => { let w = parseInt(opt) || 0; return w >= range.min && w <= range.max; });
                             const isRangeActive = selectedWattageRange === range.id;
-                            
                             const rangeBtn = document.createElement('button');
-                            if (isRangeActive) {
-                                rangeBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-indigo-600 border-indigo-600 text-white shadow-sm`;
-                                rangeBtn.disabled = false;
-                            } else if (isAvailable) {
-                                rangeBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 cursor-pointer`;
-                                rangeBtn.disabled = false;
-                            } else {
-                                rangeBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
-                                rangeBtn.disabled = true;
-                            }
-
+                            rangeBtn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isRangeActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
+                            rangeBtn.disabled = !isRangeActive && !isAvailable;
                             rangeBtn.innerText = range.label;
                             rangeBtn.onclick = () => { if (isRangeActive) { selectedWattageRange = null; delete selectedFilters['Wattage_W']; } else { selectedWattageRange = range.id; delete selectedFilters['Wattage_W']; expandedCategories.add('Wattage_W'); } updateLogic(); renderFilterUI(); };
                             optionsDiv.appendChild(rangeBtn);
                         });
 
                         if (selectedWattageRange) {
-                            const separator = document.createElement('span'); 
-                            separator.className = 'text-slate-400 mx-1 text-sm font-bold'; 
-                            separator.innerText = '>'; 
-                            optionsDiv.appendChild(separator);
-                            
+                            const separator = document.createElement('span'); separator.className = 't-text-muted mx-1 text-sm font-bold'; separator.innerText = '>'; optionsDiv.appendChild(separator);
                             let activeRangeDef = WATTAGE_RANGES.find(r => r.id === selectedWattageRange);
                             let exactAllOptions = allPossibleOptions.filter(opt => { let w = parseInt(opt) || 0; return w >= activeRangeDef.min && w <= activeRangeDef.max; });
-                            
                             exactAllOptions.forEach(opt => {
                                 const isAvailable = availableOptions.includes(opt);
                                 const isActive = selectedFilters[cat.key] === opt;
                                 const optBtn = document.createElement('button');
-                                
-                                if (isActive) {
-                                    optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-blue-600 border-blue-600 text-white shadow-sm`;
-                                    optBtn.disabled = false;
-                                } else if (isAvailable) {
-                                    optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 cursor-pointer`;
-                                    optBtn.disabled = false;
-                                } else {
-                                    optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
-                                    optBtn.disabled = true;
-                                }
-
+                                optBtn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
+                                optBtn.disabled = !isActive && !isAvailable;
                                 optBtn.innerText = opt + ' W';
                                 optBtn.onclick = () => { if (isActive) delete selectedFilters[cat.key]; else selectedFilters[cat.key] = opt; updateLogic(); renderFilterUI(); };
                                 optionsDiv.appendChild(optBtn);
@@ -727,18 +839,8 @@
                             const isAvailable = availableOptions.includes(opt);
                             const isActive = selectedFilters[cat.key] === opt;
                             const optBtn = document.createElement('button');
-                            
-                            if (isActive) {
-                                optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-blue-600 border-blue-600 text-white shadow-sm`;
-                                optBtn.disabled = false;
-                            } else if (isAvailable) {
-                                optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 cursor-pointer`;
-                                optBtn.disabled = false;
-                            } else {
-                                optBtn.className = `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60`;
-                                optBtn.disabled = true;
-                            }
-
+                            optBtn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
+                            optBtn.disabled = !isActive && !isAvailable;
                             optBtn.innerText = opt;
                             optBtn.onclick = () => { if (isActive) delete selectedFilters[cat.key]; else selectedFilters[cat.key] = opt; updateLogic(); renderFilterUI(); };
                             optionsDiv.appendChild(optBtn);
@@ -834,13 +936,12 @@
             return 'badge-standard';
         }
 
-        function getFormFactorClass(type) {
-            if (!type) return 'bg-slate-100 text-slate-500 border-slate-200';
-            const t = type.toUpperCase();
-            if (t.includes('ATX')) return 'bg-blue-100 text-blue-700 border-blue-200';
-            if (t.includes('SFX')) return 'bg-purple-100 text-purple-700 border-purple-200';
-            if (t.includes('TFX')) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-            return 'bg-slate-100 text-slate-500 border-slate-200';
+        function getFormFactorColor(type) {
+            const t = type ? type.toUpperCase() : '';
+            if (t.includes('ATX')) return 'var(--ff-atx)';
+            if (t.includes('SFX')) return 'var(--ff-sfx)';
+            if (t.includes('TFX')) return 'var(--ff-tfx)';
+            return 'var(--text-muted)';
         }
 
         function renderResults() {
@@ -851,10 +952,10 @@
 
             if (filteredData.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-full py-16 flex flex-col items-center justify-center bg-white rounded-2xl border border-dashed border-slate-300 text-slate-400">
-                        <i data-lucide="frown" class="w-12 h-12 mb-4 text-slate-300"></i>
-                        <p class="text-lg font-medium mb-6">${lang.noResult}</p>
-                        <button onclick="openInquiryModal()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2">
+                    <div class="col-span-full py-16 flex flex-col items-center justify-center t-panel t-text-muted">
+                        <i data-lucide="frown" class="w-12 h-12 mb-4 opacity-50 t-accent"></i>
+                        <p class="text-lg font-bold mb-6">${lang.noResult}</p>
+                        <button onclick="openInquiryModal()" class="px-6 py-3 t-accent-bg font-bold rounded-xl transition-all shadow-md flex items-center gap-2">
                             <i data-lucide="mail-plus" class="w-5 h-5"></i> <span>${lang.inquiry_btn_empty}</span>
                         </button>
                     </div>`;
@@ -865,64 +966,62 @@
             filteredData.forEach(item => {
                 const card = document.createElement('div');
                 const isHighCP = item.Price_Positioning === 'V';
-                const baseCard = 'bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg';
-                const borderClass = isHighCP ? 'border-2 border-orange-500 shadow-orange-100/50' : 'border border-slate-200 shadow-sm';
-                card.className = `relative rounded-2xl p-6 flex flex-col h-full overflow-hidden ${baseCard} ${borderClass}`;
+                card.className = `relative p-6 flex flex-col h-full overflow-hidden t-card ${isHighCP ? 'border-2' : ''}`;
+                if(isHighCP) card.style.borderColor = 'var(--accent)';
                 
-                let ribbonHTML = isHighCP ? `<div class="absolute top-0 right-0"><div class="bg-gradient-to-r from-orange-400 to-orange-500 text-white text-[11px] font-black px-4 py-1.5 rounded-bl-xl shadow-sm flex items-center gap-1.5 border-b border-l border-orange-300"><i data-lucide="crown" class="w-3.5 h-3.5"></i> ${lang.cp_badge}</div></div>` : '';
+                let ribbonHTML = isHighCP ? `<div class="absolute top-0 right-0"><div class="t-badge-cp text-[10px] font-black px-4 py-1.5 rounded-bl-xl shadow-md flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="award" class="w-3.5 h-3.5"></i> ${lang.cp_badge}</div></div>` : '';
                 const badgeClass = getEfficiencyBadgeClass(item.Efficiency_Level);
-                const ffClass = getFormFactorClass(item.Form_Factor);
+                const ffColor = getFormFactorColor(item.Form_Factor);
 
                 card.innerHTML = `
                     ${ribbonHTML}
                     <div class="mb-5 pr-20">
-                        <div class="inline-block px-2.5 py-1 text-[10px] font-bold tracking-wider rounded border uppercase mb-3 ${ffClass}">
+                        <div class="inline-block px-2.5 py-1 text-[10px] font-bold tracking-wider rounded border uppercase mb-3" style="color: ${ffColor}; border-color: ${ffColor}; background: transparent;">
                             ${item.Form_Factor || 'Unknown'}
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 leading-tight mb-1">${item.Model_Name}</h3>
-                        <p class="text-xs text-slate-500 font-medium">${item.ATX_Version || 'STD UNDEF'}</p>
+                        <h3 class="text-xl font-bold t-text-main leading-tight mb-1">${item.Model_Name}</h3>
+                        <p class="text-xs t-text-muted font-bold tracking-widest">${item.ATX_Version || 'STD UNDEF'}</p>
                     </div>
                     
-                    <div class="flex items-center justify-between mb-6 pb-6 border-b border-slate-100">
+                    <div class="flex items-center justify-between mb-6 pb-6 border-b t-border-base">
                         <div class="flex items-baseline">
-                            <span class="text-5xl font-black text-slate-800 tracking-tighter">${item.Wattage_W}</span>
-                            <span class="text-blue-600 font-bold text-xl ml-1">W</span>
+                            <span class="text-5xl font-black t-text-main tracking-tighter">${item.Wattage_W}</span>
+                            <span class="t-accent font-bold text-xl ml-1">W</span>
                         </div>
                         <div class="text-right flex flex-col items-end">
-                            <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">${lang.label_efficiency}</div>
-                            <div class="px-3 py-1.5 rounded-lg shadow-sm font-black text-sm tracking-wide ${badgeClass}">${item.Efficiency_Level || '-'}</div>
+                            <div class="text-[9px] t-text-muted font-bold uppercase tracking-widest mb-1">${lang.label_efficiency}</div>
+                            <div class="px-3 py-1.5 rounded-lg shadow-sm font-black text-xs tracking-wide ${badgeClass}">${item.Efficiency_Level || '-'}</div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 lg:grid-cols-2 gap-3 mb-3">
-                        <div class="flex flex-col items-center justify-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors text-center">
-                            <i data-lucide="cable" class="w-5 h-5 text-blue-500 mb-1.5"></i>
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">${lang.label_modular}</span>
-                            <span class="text-sm font-semibold text-slate-700">${item.Modular_Type || '-'}</span>
+                    <div class="grid grid-cols-2 lg:grid-cols-2 gap-3 mb-4">
+                        <div class="flex flex-col items-center justify-center p-3 t-tag-internal rounded-xl text-center">
+                            <i data-lucide="cable" class="w-5 h-5 t-icon-color mb-1.5"></i>
+                            <span class="text-[10px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_modular}</span>
+                            <span class="text-sm font-bold t-text-main truncate w-full px-1">${item.Modular_Type || '-'}</span>
                         </div>
-                        <div class="flex flex-col items-center justify-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors text-center">
-                            <i data-lucide="cpu" class="w-5 h-5 text-blue-500 mb-1.5"></i>
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">${lang.label_ports}</span>
-                            <span class="text-sm font-semibold text-slate-700">${item['12V_2x6_Ports'] > 0 ? item['12V_2x6_Ports'] + lang.unit_ports : lang.val_none}</span>
+                        <div class="flex flex-col items-center justify-center p-3 t-tag-internal rounded-xl text-center">
+                            <i data-lucide="cpu" class="w-5 h-5 t-icon-color mb-1.5"></i>
+                            <span class="text-[10px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_ports}</span>
+                            <span class="text-sm font-bold t-text-main">${item['12V_2x6_Ports'] > 0 ? item['12V_2x6_Ports'] + lang.unit_ports : lang.val_none}</span>
                         </div>
-                        <div class="flex flex-col items-center justify-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors text-center">
-                            <i data-lucide="plug" class="w-5 h-5 text-blue-500 mb-1.5"></i>
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">${lang.label_voltage}</span>
-                            <span class="text-sm font-semibold text-slate-700">${item.Input_Voltage_2 || '-'}</span>
+                        <div class="flex flex-col items-center justify-center p-3 t-tag-internal rounded-xl text-center">
+                            <i data-lucide="plug" class="w-5 h-5 t-icon-color mb-1.5"></i>
+                            <span class="text-[10px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_voltage}</span>
+                            <span class="text-sm font-bold t-text-main">${item.Input_Voltage_2 || '-'}</span>
                         </div>
-                        <div class="flex flex-col items-center justify-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors text-center">
-                            <div class="flex gap-2 mb-1.5"><i data-lucide="thermometer" class="w-4 h-4 text-blue-500"></i><i data-lucide="mountain" class="w-4 h-4 text-blue-500"></i></div>
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">${lang.label_env}</span>
-                            <span class="text-xs font-semibold text-slate-700 leading-tight">${item.Working_Temp || '-'}<br>${item.Operating_Altitude || '-'}</span>
+                        <div class="flex flex-col items-center justify-center p-3 t-tag-internal rounded-xl text-center">
+                            <div class="flex gap-2 mb-1.5"><i data-lucide="thermometer" class="w-4 h-4 t-icon-color"></i><i data-lucide="mountain" class="w-4 h-4 t-icon-color"></i></div>
+                            <span class="text-[10px] t-text-muted font-bold uppercase tracking-wider mb-0.5">${lang.label_env}</span>
+                            <span class="text-xs font-bold t-text-main leading-tight">${item.Working_Temp || '-'}<br>${item.Operating_Altitude || '-'}</span>
                         </div>
                     </div>
 
-                    <!-- 產品尺寸顯示區 (最下方) -->
-                    <div class="mt-auto flex items-center gap-2 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                        <i data-lucide="layout-template" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <div class="mt-auto flex items-center gap-2 text-[11px] t-tag-internal p-2.5 rounded-lg border">
+                        <i data-lucide="layout-template" class="w-3.5 h-3.5 t-text-muted"></i>
                         <div>
-                            <span class="font-bold text-slate-400 uppercase tracking-tight">${lang.label_dimensions}:</span> 
-                            <span class="text-slate-700 font-medium ml-1">${item.Dimension_2 || '-'} mm</span>
+                            <span class="font-bold t-text-muted uppercase tracking-tight">${lang.label_dimensions}:</span> 
+                            <span class="t-text-main font-bold ml-1">${item.Dimension_2 || '-'} mm</span>
                         </div>
                     </div>
                 `;
