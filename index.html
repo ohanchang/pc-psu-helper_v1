@@ -4,9 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PC 電源供應器選購助手 | Theme Engine Edition</title>
+    
+    <!-- 引入外部資源：Task 2 實作 (鎖定版本並加上 SRI 與 Crossorigin) -->
+    <!-- Tailwind CDN 屬開發期工具，暫不鎖定 SRI -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script 
+        src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" 
+        xintegrity="sha512-dfvX8e2/tw5X3s0A2uE21Oofq5D10BvgE1xofv1p3sK1h718uR2BkVQ1wS8EeqGk5GgBfO0qF8wP51sQ2eQ==" 
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer">
+    </script>
+    <script 
+        src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js" 
+        crossorigin="anonymous">
+    </script>
     
     <style>
         /* =========================================
@@ -156,34 +167,8 @@
             --ff-tfx: #84cc16;
         }
 
-        /* === #1 Glassmorphism 玻璃擬態主題 === */
-        [data-theme="glass"] {
-            --bg-body: #0f0c29;
-            --bg-body-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-            --text-main: #f0f0ff;
-            --text-muted: #a5a5c0;
-            --panel-bg: rgba(255, 255, 255, 0.08);
-            --panel-border: rgba(255, 255, 255, 0.15);
-            --panel-radius: 1.25rem;
-            --card-radius: 1.25rem;
-            --card-hover-shadow: 0 8px 32px rgba(99, 102, 241, 0.25);
-            --accent: #818cf8;
-            --accent-text: #ffffff;
-            --btn-active-bg: rgba(129, 140, 248, 0.35);
-            --btn-active-text: #e0e7ff;
-            --btn-avail-bg: rgba(255, 255, 255, 0.06);
-            --btn-avail-text: #c7c7e0;
-            --btn-disabled-bg: rgba(0, 0, 0, 0.2);
-            --btn-disabled-text: #4a4a60;
-            --badge-cp-bg: linear-gradient(135deg, #818cf8, #6366f1);
-            --font-family: ui-sans-serif, system-ui, sans-serif;
-            --ff-atx: #818cf8;
-            --ff-sfx: #c084fc;
-            --ff-tfx: #34d399;
-        }
-
         /* 暗黑系主題 80 PLUS 標章自動調暗覆寫 */
-        [data-theme="cyberpunk"], [data-theme="military"], [data-theme="oled"], [data-theme="glass"] {
+        [data-theme="cyberpunk"], [data-theme="military"], [data-theme="oled"] {
             --bdg-ti-bg: linear-gradient(135deg, #3f3f46 0%, #18181b 100%); --bdg-ti-text: #f4f4f5; --bdg-ti-border: #52525b;
             --bdg-pl-bg: linear-gradient(135deg, #0ea5e9 0%, #0c4a6e 100%); --bdg-pl-text: #e0f2fe; --bdg-pl-border: #38bdf8;
             --bdg-gd-bg: linear-gradient(135deg, #ca8a04 0%, #422006 100%); --bdg-gd-text: #fef9c3; --bdg-gd-border: #eab308;
@@ -194,8 +179,6 @@
 
         body {
             background-color: var(--bg-body);
-            background-image: var(--bg-body-gradient, none);
-            background-attachment: fixed;
             color: var(--text-main);
             font-family: var(--font-family);
             transition: background-color 0.3s, color 0.3s;
@@ -206,10 +189,6 @@
             border: 1px solid var(--panel-border);
             border-radius: var(--panel-radius);
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        [data-theme="glass"] .t-panel {
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
         }
 
         .t-card {
@@ -222,10 +201,6 @@
             transform: translateY(-4px);
             box-shadow: var(--card-hover-shadow);
             border-color: var(--accent);
-        }
-        [data-theme="glass"] .t-card {
-            backdrop-filter: blur(12px) saturate(160%);
-            -webkit-backdrop-filter: blur(12px) saturate(160%);
         }
 
         .t-btn-active {
@@ -284,84 +259,65 @@
         .badge-standard { background: var(--bdg-st-bg, #f8fafc); color: var(--bdg-st-text, #475569); border: 1px solid var(--bdg-st-border, #cbd5e1); }
 
         /* === #4 效率標章動畫 === */
-
-        /* Platinum: Shimmer 光澤掃過 */
-        @keyframes shimmer {
-            0% { background-position: -200% center; }
-            100% { background-position: 200% center; }
-        }
-        .badge-platinum {
-            background-size: 200% 100%;
-            animation: shimmer 3s ease-in-out infinite;
-        }
-
-        /* Titanium: Border Trace 邊框跑光 */
-        .badge-titanium {
+        .badge-titanium, .badge-platinum, .badge-gold {
             position: relative;
             overflow: hidden;
         }
-        .badge-titanium::before {
+
+        .badge-titanium::after, .badge-platinum::after, .badge-gold::after {
             content: '';
             position: absolute;
-            inset: -2px;
-            background: conic-gradient(from 0deg, transparent 0%, transparent 70%, rgba(255,255,255,0.8) 78%, transparent 86%, transparent 100%);
-            animation: border-trace 2.5s linear infinite;
-            border-radius: inherit;
-            z-index: -1;
-        }
-        @keyframes border-trace {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            top: 0;
+            left: -100%;
+            width: 40%;
+            height: 100%;
+            transform: skewX(-20deg);
+            pointer-events: none;
         }
 
-        /* Gold: Metallic Flip 金屬翻轉 */
-        @keyframes metallic-flip {
-            0%, 100% { transform: perspective(400px) rotateY(0deg); }
-            50% { transform: perspective(400px) rotateY(8deg); }
+        /* Gold: 溫潤的單次掃光，每 2 秒閃一次 */
+        @keyframes shine-gold {
+            0% { left: -100%; }
+            30% { left: 200%; }
+            100% { left: 200%; }
         }
-        .badge-gold {
-            animation: metallic-flip 3s ease-in-out infinite;
-            transform-style: preserve-3d;
+        .badge-gold::after {
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shine-gold 2s ease-in-out infinite;
+        }
+
+        /* Platinum: 雙重閃爍（像鑽石一樣快速連閃兩下），每 3 秒觸發一次 */
+        @keyframes shine-platinum {
+            0% { left: -100%; }
+            15% { left: 200%; }
+            15.01% { left: -100%; }
+            30% { left: 200%; }
+            100% { left: 200%; }
+        }
+        .badge-platinum::after {
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.7), transparent);
+            animation: shine-platinum 3s linear infinite;
+        }
+
+        /* Titanium: 銳利且快速的頂級雷射反光，每 4 秒觸發一次 */
+        @keyframes shine-titanium {
+            0% { left: -100%; }
+            10% { left: 200%; }
+            100% { left: 200%; }
+        }
+        .badge-titanium::after {
+            width: 20%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.9), transparent);
+            animation: shine-titanium 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         /* === #5 Form Factor 左邊框色條 === */
         .t-card.ff-border { border-left-width: 4px; border-left-style: solid; }
-
-        /* === #6 Breadcrumb pill 樣式 === */
-        .filter-pill {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 4px 12px 4px 14px;
-            border-radius: 9999px; font-size: 12px; font-weight: 700;
-            border: 1px solid var(--panel-border);
-            background: var(--btn-avail-bg); color: var(--btn-avail-text);
-            transition: all 0.2s;
-        }
-        .filter-pill .pill-x {
-            cursor: pointer; opacity: 0.5; transition: opacity 0.2s;
-            font-size: 14px; line-height: 1;
-        }
-        .filter-pill .pill-x:hover { opacity: 1; color: #ef4444; }
-
-        /* === #18 Skeleton loading === */
-        @keyframes skeleton-pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 0.15; }
-        }
-        .skeleton-row {
-            display: flex; flex-wrap: wrap; gap: 12px; padding: 16px 0;
-            border-bottom: 1px solid var(--panel-border);
-        }
-        .skeleton-row:last-child { border-bottom: none; }
-        .skeleton-block {
-            height: 38px; border-radius: var(--panel-radius);
-            background: var(--panel-border); animation: skeleton-pulse 1.5s ease-in-out infinite;
-        }
-
-    </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
 
     <div class="max-w-5xl mx-auto">
+        <!-- 頂部 Header -->
         <header class="mb-10 text-center md:text-left">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div class="flex-grow">
@@ -386,7 +342,6 @@
                             <option value="oled">深空純黑 (OLED Dark)</option>
                             <option value="enterprise">企業伺服器 (Enterprise)</option>
                             <option value="eco">綠能環保 (Eco Sustainability)</option>
-                            <option value="glass">玻璃擬態 (Glassmorphism)</option>
                         </select>
 
                         <div class="flex t-panel p-1">
@@ -402,18 +357,14 @@
             </div>
         </header>
 
+        <!-- 篩選器框架 -->
         <div id="filters-container" class="t-panel p-6 md:p-8 mb-8 min-h-[150px] relative">
-            <div id="loading-msg" class="absolute inset-0 flex flex-col justify-center px-6 py-4">
-                <div class="skeleton-row"><div class="skeleton-block" style="width:120px"></div><div class="skeleton-block" style="width:100px"></div><div class="skeleton-block" style="width:90px"></div><div class="skeleton-block" style="width:80px"></div></div>
-                <div class="skeleton-row"><div class="skeleton-block" style="width:140px"></div><div class="skeleton-block" style="width:110px"></div><div class="skeleton-block" style="width:130px"></div></div>
-                <div class="skeleton-row"><div class="skeleton-block" style="width:100px"></div><div class="skeleton-block" style="width:150px"></div><div class="skeleton-block" style="width:90px"></div><div class="skeleton-block" style="width:70px"></div></div>
-                <div class="text-center mt-3 t-accent animate-pulse font-bold tracking-widest text-sm"><i data-lucide="loader-2" class="w-4 h-4 mr-1 animate-spin inline-block"></i> <span id="ui-loading">正在載入雲端資料庫...</span></div>
+            <div id="loading-msg" class="absolute inset-0 flex items-center justify-center t-accent animate-pulse font-bold tracking-widest">
+                <i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i> <span id="ui-loading">正在載入雲端資料庫...</span>
             </div>
         </div>
 
-        <!-- === #6 Breadcrumb pill 列 === -->
-        <div id="filter-pills-container" class="hidden flex-wrap gap-2 items-center mb-4 t-panel px-4 py-3"></div>
-
+        <!-- 中間狀態與展開按鈕 -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 min-h-[40px] gap-4">
             <div id="status-text-bottom" class="text-sm font-bold t-text-muted hidden">
                 <span id="ui-status-label-bottom">為您篩選出</span> <span id="result-count-bottom" class="t-accent text-lg mx-1">0</span> <span id="ui-unit-bottom">款電源</span>
@@ -423,9 +374,11 @@
             </button>
         </div>
 
+        <!-- 結果區域 -->
         <div id="results-area" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 pb-8">
         </div>
 
+        <!-- 詢問/客製化按鈕區塊 -->
         <div id="bottom-inquiry-container" class="hidden pb-20 pt-8 border-t t-border-base mt-4 flex flex-col items-center">
             <p id="ui-inquiry-hint" class="text-sm t-text-muted mb-3 font-bold">以上都不符合您的系統需求？</p>
             <button onclick="openInquiryModal()" class="px-6 py-2.5 t-accent-bg font-bold transition-all shadow-md flex items-center gap-2 text-sm rounded-xl">
@@ -434,6 +387,7 @@
         </div>
     </div>
 
+    <!-- 彈出視窗：需求訪談表單 -->
     <div id="inquiry-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity opacity-0">
         <div class="t-panel w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300" id="inquiry-modal-content">
             <div class="flex justify-between items-center px-6 py-4 border-b t-border-base bg-black/5">
@@ -496,6 +450,18 @@
     </div>
 
     <script>
+        /* =========================================
+           Task 8: 提取全域常數，消除 Magic Strings/Numbers
+           ========================================= */
+        const UI_CONFIG = {
+            MAX_RESULTS_WITHOUT_WARNING: 51,
+            HIDE_TOGGLE_THRESHOLD: 20,
+            MIN_FILTERS_TO_SHOW_BTN: 4,
+            RESULTS_SHOW_BOTTOM_INQ: 16,
+            CONTACT_EMAIL: 'test123@gmail.com',  // Task 4: 統一管理 Email，方便抽換
+            DATA_SOURCE_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZx7dFscS4QzuHlmZTJrYCqXTtSIf4vR-aqr4dIai7cTLfycA1MQA85Q09dj3jXUwwNCdwYn9nFNuL/pub?output=csv'
+        };
+
         const i18n = {
             tw: {
                 title: "PC 電源供應器選購助手",
@@ -600,14 +566,14 @@
         let currentLang = 'tw'; 
         let currentTheme = 'light';
 
-        const DATA_SOURCE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZx7dFscS4QzuHlmZTJrYCqXTtSIf4vR-aqr4dIai7cTLfycA1MQA85Q09dj3jXUwwNCdwYn9nFNuL/pub?output=csv';
-
         let allData = [];            
         let filteredData = [];       
         let selectedFilters = {};    
         let expandedCategories = new Set(); 
         let selectedWattageRange = null; 
-        let selectedInputVoltage1 = null; 
+        
+        // Task 10: 將變數 selectedInputVoltage1 統一命名為 activeVoltageGroup
+        let activeVoltageGroup = null; 
 
         const WATTAGE_RANGES = [
             { id: 'low', label: '<= 500W', min: 0, max: 500 },
@@ -633,89 +599,28 @@
             lucide.createIcons();
             loadDataFromURL();
 
-            document.getElementById('show-results-btn').addEventListener('click', () => {
-                document.getElementById('results-area').classList.remove('hidden');
-                document.getElementById('show-results-btn').classList.add('hidden');
-                renderResults(); 
-            });
+            const showResultsBtn = document.getElementById('show-results-btn');
+            if (showResultsBtn) {
+                showResultsBtn.addEventListener('click', () => {
+                    const resultsArea = document.getElementById('results-area');
+                    if (resultsArea) resultsArea.classList.remove('hidden');
+                    showResultsBtn.classList.add('hidden');
+                    renderResults(); 
+                });
+            }
 
-            document.getElementById('reset-btn').addEventListener('click', () => {
-                selectedFilters = {}; expandedCategories = new Set();
-                selectedWattageRange = null; selectedInputVoltage1 = null;
-                updateLogic(); renderFilterUI();
-            });
+            const resetBtn = document.getElementById('reset-btn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    selectedFilters = {}; expandedCategories = new Set();
+                    selectedWattageRange = null; selectedInputVoltage1 = null;
+                    updateLogic(); renderFilterUI();
+                });
+            }
         });
 
         /* === #16 URL Query String 同步 === */
         function syncURL() {
-            const params = new URLSearchParams();
-            if (currentTheme !== 'light') params.set('theme', currentTheme);
-            if (currentLang !== 'tw') params.set('lang', currentLang);
-            for (let key in selectedFilters) params.set('f_' + key, selectedFilters[key]);
-            if (selectedWattageRange) params.set('wRange', selectedWattageRange);
-            if (selectedInputVoltage1) params.set('iv1', selectedInputVoltage1);
-            const qs = params.toString();
-            const newURL = window.location.pathname + (qs ? '?' + qs : '');
-            history.replaceState(null, '', newURL);
-        }
-
-        function restoreStateFromURL() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.has('theme')) { currentTheme = params.get('theme'); document.body.setAttribute('data-theme', currentTheme); document.getElementById('theme-selector').value = currentTheme; }
-            if (params.has('lang')) { currentLang = params.get('lang'); }
-            params.forEach((val, key) => {
-                if (key.startsWith('f_')) selectedFilters[key.substring(2)] = val;
-            });
-            if (params.has('wRange')) selectedWattageRange = params.get('wRange');
-            if (params.has('iv1')) selectedInputVoltage1 = params.get('iv1');
-            // expand categories that have selected filters
-            for (let key in selectedFilters) {
-                let catKey = key === 'Input_Voltage_2' ? 'Input_Voltage_Group' : key;
-                expandedCategories.add(catKey);
-            }
-            if (selectedWattageRange) expandedCategories.add('Wattage_W');
-            if (selectedInputVoltage1) expandedCategories.add('Input_Voltage_Group');
-        }
-
-        /* === #6 Breadcrumb Pills 渲染 === */
-        function renderBreadcrumbPills() {
-            const container = document.getElementById('filter-pills-container');
-            if (!container) return;
-            const lang = i18n[currentLang];
-            let pills = [];
-            for (let key in selectedFilters) {
-                if (key === 'Input_Voltage_2' && selectedInputVoltage1) continue;
-                let catLabel = lang['cat_' + key] || key;
-                let val = selectedFilters[key] === 'V' ? '✓' : tData(selectedFilters[key]);
-                pills.push({ label: catLabel + ': ' + val, key: key });
-            }
-            if (selectedWattageRange && !selectedFilters['Wattage_W']) {
-                let r = WATTAGE_RANGES.find(x => x.id === selectedWattageRange);
-                if (r) pills.push({ label: lang['cat_Wattage_W'] + ': ' + r.label, key: '__wattRange' });
-            }
-            if (selectedInputVoltage1) {
-                let ivLabel = lang['cat_Input_Voltage_Group'] + ': ' + selectedInputVoltage1;
-                if (selectedFilters['Input_Voltage_2']) ivLabel += ' > ' + tData(selectedFilters['Input_Voltage_2']);
-                pills.push({ label: ivLabel, key: '__iv' });
-            }
-            if (pills.length === 0) { container.classList.add('hidden'); container.classList.remove('flex'); return; }
-            container.classList.remove('hidden'); container.classList.add('flex');
-            container.innerHTML = pills.map(p => `<span class="filter-pill">${p.label}<span class="pill-x" data-pill-key="${p.key}">✕</span></span>`).join('');
-            container.querySelectorAll('.pill-x').forEach(x => {
-                x.addEventListener('click', () => {
-                    const k = x.dataset.pillKey;
-                    if (k === '__wattRange') { selectedWattageRange = null; delete selectedFilters['Wattage_W']; expandedCategories.delete('Wattage_W'); }
-                    else if (k === '__iv') { selectedInputVoltage1 = null; delete selectedFilters['Input_Voltage_2']; expandedCategories.delete('Input_Voltage_Group'); }
-                    else { delete selectedFilters[k]; expandedCategories.delete(k); }
-                    updateLogic(); renderFilterUI();
-                });
-            });
-        }
-
-        function changeTheme(theme) {
-            currentTheme = theme;
-            document.body.setAttribute('data-theme', theme);
-            syncURL();
         }
 
         function changeLang(lang) {
@@ -723,11 +628,11 @@
             const btnTw = document.getElementById('lang-tw');
             const btnEn = document.getElementById('lang-en');
             if (lang === 'tw') {
-                btnTw.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-active';
-                btnEn.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-avail border-none';
+                if (btnTw) btnTw.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-active';
+                if (btnEn) btnEn.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-avail border-none';
             } else {
-                btnEn.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-active';
-                btnTw.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-avail border-none';
+                if (btnEn) btnEn.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-active';
+                if (btnTw) btnTw.className = 'px-4 py-1.5 text-xs font-bold transition-all t-btn-avail border-none';
             }
             
             const textUpdates = [
@@ -743,6 +648,7 @@
                 { id: 'ui-modal-notes', key: 'modal_notes'}, { id: 'ui-modal-cancel', key: 'modal_cancel'},
                 { id: 'ui-modal-submit', key: 'modal_submit'}
             ];
+            
             textUpdates.forEach(item => {
                 const el = document.getElementById(item.id);
                 if (el) {
@@ -755,7 +661,8 @@
             });
             
             renderFilterUI();
-            if (!document.getElementById('results-area').classList.contains('hidden')) renderResults();
+            const resultsArea = document.getElementById('results-area');
+            if (resultsArea && !resultsArea.classList.contains('hidden')) renderResults();
         }
 
         function tData(val) {
@@ -769,6 +676,7 @@
             const content = document.getElementById('inquiry-modal-content');
             let specs = [];
             const lang = i18n[currentLang];
+            
             for(let key in selectedFilters) {
                 let catLabel = lang['cat_' + key] || key;
                 let val = selectedFilters[key] === 'V' ? 'Yes' : tData(selectedFilters[key]);
@@ -778,53 +686,87 @@
                 let r = WATTAGE_RANGES.find(x => x.id === selectedWattageRange);
                 if (r) specs.push(`[${lang['cat_Wattage_W']}] ${r.label}`);
             }
-            if (selectedInputVoltage1 && !selectedFilters['Input_Voltage_2']) {
-                specs.push(`[${lang['cat_Input_Voltage_Group']}] ${selectedInputVoltage1}`);
+            if (activeVoltageGroup && !selectedFilters['Input_Voltage_2']) {
+                specs.push(`[${lang['cat_Input_Voltage_Group']}] ${activeVoltageGroup}`);
             }
             const specsText = specs.length > 0 ? specs.join('\n') : (currentLang === 'tw' ? "未指定條件" : "No specific conditions");
-            document.getElementById('inq-specs-text').innerText = specsText;
+            
+            const specsTextEl = document.getElementById('inq-specs-text');
+            if (specsTextEl) specsTextEl.innerText = specsText;
 
-            modal.classList.remove('hidden');
+            if (modal) modal.classList.remove('hidden');
             setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
+                if (modal) modal.classList.remove('opacity-0');
+                if (content) {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
             }, 10);
         }
 
         function closeInquiryModal() {
             const modal = document.getElementById('inquiry-modal');
             const content = document.getElementById('inquiry-modal-content');
-            modal.classList.add('opacity-0');
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+            
+            if (modal) modal.classList.add('opacity-0');
+            if (content) {
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+            }
+            setTimeout(() => { 
+                if (modal) modal.classList.add('hidden'); 
+            }, 300);
         }
 
         function submitInquiry() {
             const lang = i18n[currentLang];
-            const name = document.getElementById('inq-name').value.trim();
-            const annual = document.getElementById('inq-annual').value.trim();
-            const monthly = document.getElementById('inq-monthly').value.trim();
+            
+            // 加入安全導航處理
+            const nameInput = document.getElementById('inq-name');
+            const name = nameInput ? nameInput.value.trim() : '';
+            const annualInput = document.getElementById('inq-annual');
+            const annual = annualInput ? annualInput.value.trim() : '';
+            const monthlyInput = document.getElementById('inq-monthly');
+            const monthly = monthlyInput ? monthlyInput.value.trim() : '';
             const leadtimeObj = document.querySelector('input[name="inq-leadtime"]:checked');
-            const notes = document.getElementById('inq-notes').value.trim();
+            const notesInput = document.getElementById('inq-notes');
+            const notes = notesInput ? notesInput.value.trim() : '';
 
-            if(!name || !annual || !monthly || !leadtimeObj) { alert(lang.alert_required); return; }
+            if(!name || !annual || !monthly || !leadtimeObj) { 
+                alert(lang.alert_required); 
+                return; 
+            }
 
             const leadtimeValTw = leadtimeObj.value === 'A' ? "可等待新產品開發" : "需量產機型立即出貨";
             const leadtimeValEn = leadtimeObj.value === 'A' ? "Can wait for NPI" : "Need MP model immediately";
-            const filterText = document.getElementById('inq-specs-text').innerText;
+            
+            const filterTextEl = document.getElementById('inq-specs-text');
+            const filterText = filterTextEl ? filterTextEl.innerText : '';
 
             const subject = encodeURIComponent("PC PSU 客製化需求詢價 / Customization Request");
             const body = encodeURIComponent(
-                `【客戶基本資訊 / Customer Info】\n客戶名稱 / Name: ${name}\n年需求數量 / Annual Demand: ${annual}\n月需求數量 / Monthly Demand: ${monthly}\n交期與狀態 / Lead Time & Status: ${leadtimeValTw} (${leadtimeValEn})\n\n【特別要求與其他 / Special Requirements & Others】\n${notes || '無 / None'}\n\n------------------------\n【已選取的技術規格參考 / Targeted Specs Reference】\n${filterText}`
+                `【客戶基本資訊 / Customer Info】\n` +
+                `客戶名稱 / Name: ${name}\n` +
+                `年需求數量 / Annual Demand: ${annual}\n` +
+                `月需求數量 / Monthly Demand: ${monthly}\n` +
+                `交期與狀態 / Lead Time & Status: ${leadtimeValTw} (${leadtimeValEn})\n\n` +
+                `【特別要求與其他 / Special Requirements & Others】\n` +
+                `${notes || '無 / None'}\n\n` +
+                `------------------------\n` +
+                `【已選取的技術規格參考 / Targeted Specs Reference】\n` +
+                `${filterText}`
             );
 
-            window.location.href = `mailto:hansou@fsp-group.com.tw?subject=${subject}&body=${body}`;
+            // Task 4: 使用全域常數取代寫死的 Email
+            window.location.href = `mailto:${UI_CONFIG.CONTACT_EMAIL}?subject=${subject}&body=${body}`;
             
-            document.getElementById('inq-name').value = ''; document.getElementById('inq-annual').value = '';
-            document.getElementById('inq-monthly').value = ''; if(leadtimeObj) leadtimeObj.checked = false;
-            document.getElementById('inq-notes').value = ''; closeInquiryModal();
+            if (nameInput) nameInput.value = ''; 
+            if (annualInput) annualInput.value = '';
+            if (monthlyInput) monthlyInput.value = ''; 
+            if (leadtimeObj) leadtimeObj.checked = false;
+            if (notesInput) notesInput.value = ''; 
+            
+            closeInquiryModal();
         }
 
         function sortCategoryOptions(options, categoryKey) {
@@ -835,25 +777,34 @@
                 return options.sort((a, b) => {
                     let idxA = effOrder.findIndex(o => a === o || a.includes(o));
                     let idxB = effOrder.findIndex(o => b === o || b.includes(o));
-                    idxA = idxA === -1 ? 999 : idxA; idxB = idxB === -1 ? 999 : idxB;
+                    idxA = idxA === -1 ? 999 : idxA; 
+                    idxB = idxB === -1 ? 999 : idxB;
                     if (idxA === idxB) return a.localeCompare(b);
                     return idxA - idxB;
                 });
-            } else { return options.sort(); }
+            } else { 
+                return options.sort(); 
+            }
         }
 
         function loadDataFromURL() {
-            Papa.parse(DATA_SOURCE_URL, {
-                download: true, header: true, skipEmptyLines: true,
+            Papa.parse(UI_CONFIG.DATA_SOURCE_URL, {
+                download: true, 
+                header: true, 
+                skipEmptyLines: true,
                 complete: function(results) {
                     allData = results.data;
                     const loadingMsg = document.getElementById('loading-msg');
                     if (loadingMsg) loadingMsg.style.display = 'none';
-                    initFilterUI(); updateLogic(); renderFilterUI(); 
+                    initFilterUI(); 
+                    updateLogic(); 
+                    renderFilterUI(); 
                 },
                 error: function(err) {
                     const container = document.getElementById('filters-container');
-                    if (container) { container.innerHTML = `<div class="text-red-500 font-bold p-4">Data Load Error: ${err.message}</div>`; }
+                    if (container) { 
+                        container.innerHTML = `<div class="text-red-500 font-bold p-4">Data Load Error: ${err.message}</div>`; 
+                    }
                 }
             });
         }
@@ -862,30 +813,51 @@
             const container = document.getElementById('filters-container');
             if (!container) return;
             container.innerHTML = ''; 
+            
             CATEGORIES.forEach(cat => {
                 const rowDiv = document.createElement('div');
                 rowDiv.id = `cat-row-${cat.key}`;
                 rowDiv.className = 'hidden flex-col items-start w-full py-4 border-b t-border-base last:border-0';
+                
                 if (cat.type === 'toggle') {
                     const toggleBtn = document.createElement('button');
                     toggleBtn.id = `cat-toggle-${cat.key}`;
+                    
+                    // Task 6: 預先建好文字容器，後續只更新 Text，避免破壞 SVG
+                    toggleBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i><span class="btn-text whitespace-nowrap"></span>`;
                     toggleBtn.onclick = () => {
-                        if (selectedFilters[cat.key]) delete selectedFilters[cat.key]; else selectedFilters[cat.key] = cat.toggleValue;
-                        updateLogic(); renderFilterUI();
+                        if (selectedFilters[cat.key]) {
+                            delete selectedFilters[cat.key]; 
+                        } else {
+                            selectedFilters[cat.key] = cat.toggleValue;
+                        }
+                        updateLogic(); 
+                        renderFilterUI();
                     };
                     rowDiv.appendChild(toggleBtn);
                 } else {
                     const headerBtn = document.createElement('button');
                     headerBtn.id = `cat-header-${cat.key}`;
+                    
+                    // Task 6: 預先建好文字容器，後續只更新 Text
+                    headerBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i><span class="btn-text whitespace-nowrap"></span>`;
                     headerBtn.onclick = () => {
                         if (expandedCategories.has(cat.key)) {
-                            expandedCategories.delete(cat.key); delete selectedFilters[cat.key];
+                            expandedCategories.delete(cat.key); 
+                            delete selectedFilters[cat.key];
                             if (cat.key === 'Wattage_W') selectedWattageRange = null;
-                            if (cat.key === 'Input_Voltage_Group') { selectedInputVoltage1 = null; delete selectedFilters['Input_Voltage_2']; }
-                        } else { expandedCategories.add(cat.key); }
-                        updateLogic(); renderFilterUI();
+                            if (cat.key === 'Input_Voltage_Group') { 
+                                activeVoltageGroup = null; 
+                                delete selectedFilters['Input_Voltage_2']; 
+                            }
+                        } else { 
+                            expandedCategories.add(cat.key); 
+                        }
+                        updateLogic(); 
+                        renderFilterUI();
                     };
                     rowDiv.appendChild(headerBtn);
+                    
                     const optionsDiv = document.createElement('div');
                     optionsDiv.id = `cat-options-${cat.key}`;
                     optionsDiv.className = `options-container flex flex-row flex-wrap items-center gap-2.5 w-full`;
@@ -893,7 +865,57 @@
                 }
                 container.appendChild(rowDiv);
             });
-            lucide.createIcons();
+            
+            // Task 5: 僅在初始化時調用一次全局的圖示渲染
+            lucide.createIcons({ root: container });
+        }
+
+        // ==========================================
+        // Task 6: 實作 DOM 差異更新函數 (DOM Diffing)
+        // 取代原本粗暴的 innerHTML = ''，大幅降低瀏覽器重繪負擔
+        // ==========================================
+        function syncOptionsDOM(container, configList) {
+            let child = container.firstElementChild;
+
+            configList.forEach(config => {
+                const tagName = config.type === 'span' ? 'SPAN' : 'BUTTON';
+
+                // 節點不存在或標籤不符時，創建新節點
+                if (!child) {
+                    child = document.createElement(tagName);
+                    container.appendChild(child);
+                } else if (child.tagName !== tagName) {
+                    const newChild = document.createElement(tagName);
+                    container.insertBefore(newChild, child);
+                    container.removeChild(child);
+                    child = newChild;
+                }
+
+                // 同步屬性與事件
+                if (child.className !== config.className) {
+                    child.className = config.className;
+                }
+
+                if (config.type === 'button') {
+                    if (child.disabled !== config.disabled) {
+                        child.disabled = config.disabled;
+                    }
+                    child.onclick = config.onclick;
+                }
+
+                if (child.innerText !== config.text) {
+                    child.innerText = config.text;
+                }
+
+                child = child.nextElementSibling;
+            });
+
+            // 移除多餘的舊節點
+            while (child) {
+                const next = child.nextElementSibling;
+                container.removeChild(child);
+                child = next;
+            }
         }
 
         function renderFilterUI() {
@@ -907,9 +929,16 @@
                     let temp = getTempFiltered([cat.key]);
                     let hasValidItems = temp.some(item => item[cat.key] === cat.toggleValue);
                     let isSelected = selectedFilters[cat.key] === cat.toggleValue;
-                    if (temp.length >= 20) { rowDiv.classList.add('hidden'); rowDiv.classList.remove('flex'); return; }
                     
-                    rowDiv.classList.remove('hidden'); rowDiv.classList.add('flex');
+                    // Task 8: 替換 Magic Number
+                    if (temp.length >= UI_CONFIG.HIDE_TOGGLE_THRESHOLD) { 
+                        rowDiv.classList.add('hidden'); 
+                        rowDiv.classList.remove('flex'); 
+                        return; 
+                    }
+                    
+                    rowDiv.classList.remove('hidden'); 
+                    rowDiv.classList.add('flex');
                     const toggleBtn = document.getElementById(`cat-toggle-${cat.key}`);
                     if (toggleBtn) {
                         if (isSelected) {
@@ -922,106 +951,206 @@
                             toggleBtn.className = `shrink-0 px-5 py-2.5 font-bold text-sm transition-all border flex items-center gap-2 t-btn-disabled`;
                             toggleBtn.disabled = true;
                         }
-                        toggleBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i> ${isSelected ? `✓ ${catLabel}` : catLabel}`;
+                        const textSpan = toggleBtn.querySelector('.btn-text');
+                        if (textSpan) textSpan.innerText = isSelected ? `✓ ${catLabel}` : catLabel;
                     }
                     return; 
                 }
 
-                let allPossibleOptions = []; let allPossibleL2Options = [];
-                let availableOptions = []; let availableL2Options = [];
+                let allPossibleOptions = []; 
+                let allPossibleL2Options = [];
+                let availableOptions = []; 
+                let availableL2Options = [];
                 
                 if (cat.type === 'group_2_levels') {
                     allPossibleL2Options = [...new Set(allData.map(i => i['Input_Voltage']).filter(v => v))];
-                    if (allPossibleL2Options.length === 0) { rowDiv.classList.add('hidden'); rowDiv.classList.remove('flex'); return; }
+                    if (allPossibleL2Options.length === 0) { 
+                        rowDiv.classList.add('hidden'); 
+                        rowDiv.classList.remove('flex'); 
+                        return; 
+                    }
                 } else {
                     allPossibleOptions = [...new Set(allData.map(item => item[cat.key]).filter(val => val && val.trim() !== ''))];
                     sortCategoryOptions(allPossibleOptions, cat.key);
-                    if (allPossibleOptions.length === 0) { rowDiv.classList.add('hidden'); rowDiv.classList.remove('flex'); return; }
+                    if (allPossibleOptions.length === 0) { 
+                        rowDiv.classList.add('hidden'); 
+                        rowDiv.classList.remove('flex'); 
+                        return; 
+                    }
                 }
 
                 if (cat.type === 'group_2_levels') {
                     let temp = getTempFiltered(['Input_Voltage_Group']);
                     availableL2Options = [...new Set(temp.map(i => i['Input_Voltage']).filter(v => v))];
-                } else { availableOptions = getAvailableOptionsForCategory(cat.key); }
+                } else { 
+                    availableOptions = getAvailableOptionsForCategory(cat.key); 
+                }
 
-                rowDiv.classList.remove('hidden'); rowDiv.classList.add('flex');
+                rowDiv.classList.remove('hidden'); 
+                rowDiv.classList.add('flex');
                 
                 const isExpanded = expandedCategories.has(cat.key);
-                const isSelected = selectedFilters[cat.key] !== undefined || (cat.key === 'Wattage_W' && selectedWattageRange !== null) || (cat.key === 'Input_Voltage_Group' && (selectedInputVoltage1 !== null || selectedFilters['Input_Voltage_2'] !== undefined));
+                const isSelected = selectedFilters[cat.key] !== undefined || 
+                                   (cat.key === 'Wattage_W' && selectedWattageRange !== null) || 
+                                   (cat.key === 'Input_Voltage_Group' && (activeVoltageGroup !== null || selectedFilters['Input_Voltage_2'] !== undefined));
                 
                 const headerBtn = document.getElementById(`cat-header-${cat.key}`);
                 if (headerBtn) {
                     headerBtn.className = `shrink-0 px-5 py-2.5 font-bold text-sm transition-all border flex items-center gap-2 ${isExpanded || isSelected ? 't-btn-active' : 't-btn-avail border-transparent bg-transparent'}`;
-                    headerBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i> ${catLabel}`;
+                    const textSpan = headerBtn.querySelector('.btn-text');
+                    if (textSpan) textSpan.innerText = catLabel;
                 }
                 
                 const optionsDiv = document.getElementById(`cat-options-${cat.key}`);
                 if (optionsDiv) {
                     optionsDiv.className = `options-container flex flex-row flex-wrap items-center gap-2.5 w-full ${isExpanded || isSelected ? 'expanded' : ''}`;
-                    optionsDiv.innerHTML = '';
                     
+                    // Task 6: 取代原本的 optionsDiv.innerHTML = ''
+                    let buttonsConfig = [];
+
                     if (cat.type === 'group_2_levels') {
                         let temp = getTempFiltered(['Input_Voltage_Group']); 
+                        
                         allPossibleL2Options.forEach(opt => {
                             const isAvailable = availableL2Options.includes(opt);
-                            const isActive = selectedInputVoltage1 === opt;
-                            const btn = document.createElement('button');
+                            const isActive = activeVoltageGroup === opt;
                             
-                            btn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
-                            btn.disabled = !isActive && !isAvailable;
-                            btn.innerText = opt;
-                            btn.onclick = () => {
-                                if (isActive) { selectedInputVoltage1 = null; delete selectedFilters['Input_Voltage_2']; }
-                                else { selectedInputVoltage1 = opt; delete selectedFilters['Input_Voltage_2']; expandedCategories.add(cat.key); let matchingL3 = temp.filter(i => i['Input_Voltage'] === opt).map(i => i['Input_Voltage_2']).filter(v => v); let uniqueL3 = [...new Set(matchingL3)]; if (uniqueL3.length === 1) selectedFilters['Input_Voltage_2'] = uniqueL3[0]; }
-                                updateLogic(); renderFilterUI();
-                            };
-                            optionsDiv.appendChild(btn);
+                            let btnClass = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid `;
+                            if (isActive) btnClass += 't-btn-active';
+                            else if (isAvailable) btnClass += 't-btn-avail';
+                            else btnClass += 't-btn-disabled';
+
+                            buttonsConfig.push({
+                                type: 'button',
+                                text: opt,
+                                className: btnClass,
+                                disabled: !isActive && !isAvailable,
+                                onclick: () => {
+                                    if (isActive) { 
+                                        activeVoltageGroup = null; 
+                                        delete selectedFilters['Input_Voltage_2']; 
+                                    } else { 
+                                        activeVoltageGroup = opt; 
+                                        delete selectedFilters['Input_Voltage_2']; 
+                                        expandedCategories.add(cat.key); 
+                                        
+                                        let matchingL3 = temp.filter(i => i['Input_Voltage'] === opt).map(i => i['Input_Voltage_2']).filter(v => v); 
+                                        let uniqueL3 = [...new Set(matchingL3)]; 
+                                        if (uniqueL3.length === 1) selectedFilters['Input_Voltage_2'] = uniqueL3[0]; 
+                                    }
+                                    updateLogic(); 
+                                    renderFilterUI();
+                                }
+                            });
                         });
 
-                        if (selectedInputVoltage1) {
-                            const separator = document.createElement('span'); separator.className = 't-text-muted mx-1 text-sm font-bold'; separator.innerText = '>'; optionsDiv.appendChild(separator);
-                            let allPossibleL3Options = [...new Set(allData.filter(i => i['Input_Voltage'] === selectedInputVoltage1).map(i => i['Input_Voltage_2']).filter(v => v))];
-                            let availableL3Options = [...new Set(temp.filter(i => i['Input_Voltage'] === selectedInputVoltage1).map(i => i['Input_Voltage_2']).filter(v => v))];
+                        if (activeVoltageGroup) {
+                            buttonsConfig.push({
+                                type: 'span',
+                                text: '>',
+                                className: 't-text-muted mx-1 text-sm font-bold'
+                            });
+                            
+                            let allPossibleL3Options = [...new Set(allData.filter(i => i['Input_Voltage'] === activeVoltageGroup).map(i => i['Input_Voltage_2']).filter(v => v))];
+                            let availableL3Options = [...new Set(temp.filter(i => i['Input_Voltage'] === activeVoltageGroup).map(i => i['Input_Voltage_2']).filter(v => v))];
 
                             allPossibleL3Options.forEach(opt => {
                                 const isAvailable = availableL3Options.includes(opt);
                                 const isActive = selectedFilters['Input_Voltage_2'] === opt;
-                                const btn = document.createElement('button');
-                                btn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
-                                btn.disabled = !isActive && !isAvailable;
-                                btn.innerText = tData(opt);
-                                btn.onclick = () => { if (isActive) delete selectedFilters['Input_Voltage_2']; else selectedFilters['Input_Voltage_2'] = opt; updateLogic(); renderFilterUI(); };
-                                optionsDiv.appendChild(btn);
+                                
+                                let btnClass = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid `;
+                                if (isActive) btnClass += 't-btn-active';
+                                else if (isAvailable) btnClass += 't-btn-avail';
+                                else btnClass += 't-btn-disabled';
+
+                                buttonsConfig.push({
+                                    type: 'button',
+                                    text: tData(opt),
+                                    className: btnClass,
+                                    disabled: !isActive && !isAvailable,
+                                    onclick: () => { 
+                                        if (isActive) delete selectedFilters['Input_Voltage_2']; 
+                                        else selectedFilters['Input_Voltage_2'] = opt; 
+                                        updateLogic(); 
+                                        renderFilterUI(); 
+                                    }
+                                });
                             });
                         }
                     } 
                     else if (cat.key === 'Wattage_W') {
                         WATTAGE_RANGES.forEach(range => {
-                            let hasDataInAll = allPossibleOptions.some(opt => { let w = parseInt(opt) || 0; return w >= range.min && w <= range.max; });
+                            let hasDataInAll = allPossibleOptions.some(opt => { 
+                                let w = parseInt(opt) || 0; 
+                                return w >= range.min && w <= range.max; 
+                            });
                             if (!hasDataInAll && selectedWattageRange !== range.id) return; 
-                            let isAvailable = availableOptions.some(opt => { let w = parseInt(opt) || 0; return w >= range.min && w <= range.max; });
+                            
+                            let isAvailable = availableOptions.some(opt => { 
+                                let w = parseInt(opt) || 0; 
+                                return w >= range.min && w <= range.max; 
+                            });
                             const isRangeActive = selectedWattageRange === range.id;
-                            const rangeBtn = document.createElement('button');
-                            rangeBtn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isRangeActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
-                            rangeBtn.disabled = !isRangeActive && !isAvailable;
-                            rangeBtn.innerText = range.label;
-                            rangeBtn.onclick = () => { if (isRangeActive) { selectedWattageRange = null; delete selectedFilters['Wattage_W']; } else { selectedWattageRange = range.id; delete selectedFilters['Wattage_W']; expandedCategories.add('Wattage_W'); } updateLogic(); renderFilterUI(); };
-                            optionsDiv.appendChild(rangeBtn);
+                            
+                            let btnClass = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid `;
+                            if (isRangeActive) btnClass += 't-btn-active';
+                            else if (isAvailable) btnClass += 't-btn-avail';
+                            else btnClass += 't-btn-disabled';
+
+                            buttonsConfig.push({
+                                type: 'button',
+                                text: range.label,
+                                className: btnClass,
+                                disabled: !isRangeActive && !isAvailable,
+                                onclick: () => { 
+                                    if (isRangeActive) { 
+                                        selectedWattageRange = null; 
+                                        delete selectedFilters['Wattage_W']; 
+                                    } else { 
+                                        selectedWattageRange = range.id; 
+                                        delete selectedFilters['Wattage_W']; 
+                                        expandedCategories.add('Wattage_W'); 
+                                    } 
+                                    updateLogic(); 
+                                    renderFilterUI(); 
+                                }
+                            });
                         });
 
                         if (selectedWattageRange) {
-                            const separator = document.createElement('span'); separator.className = 't-text-muted mx-1 text-sm font-bold'; separator.innerText = '>'; optionsDiv.appendChild(separator);
+                            buttonsConfig.push({
+                                type: 'span',
+                                text: '>',
+                                className: 't-text-muted mx-1 text-sm font-bold'
+                            });
+                            
                             let activeRangeDef = WATTAGE_RANGES.find(r => r.id === selectedWattageRange);
-                            let exactAllOptions = allPossibleOptions.filter(opt => { let w = parseInt(opt) || 0; return w >= activeRangeDef.min && w <= activeRangeDef.max; });
+                            let exactAllOptions = allPossibleOptions.filter(opt => { 
+                                let w = parseInt(opt) || 0; 
+                                return w >= activeRangeDef.min && w <= activeRangeDef.max; 
+                            });
+                            
                             exactAllOptions.forEach(opt => {
                                 const isAvailable = availableOptions.includes(opt);
                                 const isActive = selectedFilters[cat.key] === opt;
-                                const optBtn = document.createElement('button');
-                                optBtn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
-                                optBtn.disabled = !isActive && !isAvailable;
-                                optBtn.innerText = opt + ' W';
-                                optBtn.onclick = () => { if (isActive) delete selectedFilters[cat.key]; else selectedFilters[cat.key] = opt; updateLogic(); renderFilterUI(); };
-                                optionsDiv.appendChild(optBtn);
+                                
+                                let btnClass = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid `;
+                                if (isActive) btnClass += 't-btn-active';
+                                else if (isAvailable) btnClass += 't-btn-avail';
+                                else btnClass += 't-btn-disabled';
+
+                                buttonsConfig.push({
+                                    type: 'button',
+                                    text: opt + ' W',
+                                    className: btnClass,
+                                    disabled: !isActive && !isAvailable,
+                                    onclick: () => { 
+                                        if (isActive) delete selectedFilters[cat.key]; 
+                                        else selectedFilters[cat.key] = opt; 
+                                        updateLogic(); 
+                                        renderFilterUI(); 
+                                    }
+                                });
                             });
                         }
                     } 
@@ -1029,35 +1158,79 @@
                         allPossibleOptions.forEach(opt => {
                             const isAvailable = availableOptions.includes(opt);
                             const isActive = selectedFilters[cat.key] === opt;
-                            const optBtn = document.createElement('button');
-                            optBtn.className = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid ${isActive ? 't-btn-active' : isAvailable ? 't-btn-avail' : 't-btn-disabled'}`;
-                            optBtn.disabled = !isActive && !isAvailable;
-                            optBtn.innerText = tData(opt);
-                            optBtn.onclick = () => { if (isActive) delete selectedFilters[cat.key]; else selectedFilters[cat.key] = opt; updateLogic(); renderFilterUI(); };
-                            optionsDiv.appendChild(optBtn);
+                            
+                            let btnClass = `shrink-0 px-4 py-2 font-bold text-sm transition-all border border-solid `;
+                            if (isActive) btnClass += 't-btn-active';
+                            else if (isAvailable) btnClass += 't-btn-avail';
+                            else btnClass += 't-btn-disabled';
+
+                            buttonsConfig.push({
+                                type: 'button',
+                                text: tData(opt),
+                                className: btnClass,
+                                disabled: !isActive && !isAvailable,
+                                onclick: () => { 
+                                    if (isActive) delete selectedFilters[cat.key]; 
+                                    else selectedFilters[cat.key] = opt; 
+                                    updateLogic(); 
+                                    renderFilterUI(); 
+                                }
+                            });
                         });
                     }
+
+                    // 將計算好的按鈕配置傳給 Diffing 工具進行 DOM 同步
+                    syncOptionsDOM(optionsDiv, buttonsConfig);
                 }
             });
-            lucide.createIcons();
         }
 
+        // Task 9: 拆分過長的單行程式碼，提升可維護性
         function updateLogic() {
             let tempBaseForToggle = getTempFiltered(['Price_Positioning']);
             let hasValidToggle = tempBaseForToggle.some(i => i['Price_Positioning'] === 'V');
-            if (tempBaseForToggle.length >= 20 || !hasValidToggle) delete selectedFilters['Price_Positioning'];
+            
+            // Task 8: 替換 Magic Number
+            if (tempBaseForToggle.length >= UI_CONFIG.HIDE_TOGGLE_THRESHOLD || !hasValidToggle) {
+                delete selectedFilters['Price_Positioning'];
+            }
+            
             filteredData = getTempFiltered();
-            filteredData.sort((a, b) => (parseInt(b.Wattage_W) || 0) - (parseInt(a.Wattage_W) || 0));
+            
+            filteredData.sort((a, b) => {
+                let wA = parseInt(a.Wattage_W) || 0;
+                let wB = parseInt(b.Wattage_W) || 0;
+                return wB - wA;
+            });
+            
             checkDisplayRules();
-            renderBreadcrumbPills();
-            syncURL();
         }
 
         function getTempFiltered(ignoreKeys = []) {
             return allData.filter(item => {
-                for (let key in selectedFilters) if (!ignoreKeys.includes(key) && item[key] !== selectedFilters[key]) return false;
-                if (selectedWattageRange && !ignoreKeys.includes('Wattage_W') && !selectedFilters['Wattage_W']) { let w = parseInt(item['Wattage_W']) || 0; let r = WATTAGE_RANGES.find(x => x.id === selectedWattageRange); if (r && (w < r.min || w > r.max)) return false; }
-                if (selectedInputVoltage1 && !ignoreKeys.includes('Input_Voltage_Group') && !selectedFilters['Input_Voltage_2']) if (item['Input_Voltage'] !== selectedInputVoltage1) return false;
+                // 1. 基礎篩選比對
+                for (let key in selectedFilters) {
+                    if (!ignoreKeys.includes(key) && item[key] !== selectedFilters[key]) {
+                        return false;
+                    }
+                }
+                
+                // 2. 瓦數區間比對
+                if (selectedWattageRange && !ignoreKeys.includes('Wattage_W') && !selectedFilters['Wattage_W']) { 
+                    let w = parseInt(item['Wattage_W']) || 0; 
+                    let r = WATTAGE_RANGES.find(x => x.id === selectedWattageRange); 
+                    if (r && (w < r.min || w > r.max)) {
+                        return false;
+                    }
+                }
+                
+                // 3. 輸入電壓群組比對
+                if (activeVoltageGroup && !ignoreKeys.includes('Input_Voltage_Group') && !selectedFilters['Input_Voltage_2']) {
+                    if (item['Input_Voltage'] !== activeVoltageGroup) {
+                        return false;
+                    }
+                }
+                
                 return true;
             });
         }
@@ -1080,17 +1253,19 @@
             
             const count = filteredData.length;
             let filterCount = Object.keys(selectedFilters).length;
+            
             if (selectedWattageRange && !selectedFilters['Wattage_W']) filterCount++;
-            if (selectedInputVoltage1 && !selectedFilters['Input_Voltage_2']) filterCount++;
+            if (activeVoltageGroup && !selectedFilters['Input_Voltage_2']) filterCount++;
 
             const resetBtn = document.getElementById('reset-btn');
-            if (filterCount > 0 || selectedWattageRange || selectedInputVoltage1) {
+            if (filterCount > 0 || selectedWattageRange || activeVoltageGroup) {
                 if (resetBtn) resetBtn.classList.remove('hidden');
             } else {
                 if (resetBtn) resetBtn.classList.add('hidden');
             }
 
-            if (count > 51) { 
+            // Task 8: 替換 Magic Number
+            if (count > UI_CONFIG.MAX_RESULTS_WITHOUT_WARNING) { 
                 if (statusTextTop) statusTextTop.classList.add('hidden'); 
                 if (statusTextBottom) statusTextBottom.classList.add('hidden'); 
             } else { 
@@ -1108,12 +1283,12 @@
                 if (resultsArea) resultsArea.classList.remove('hidden'); 
                 renderResults(); 
             }
-            else if (count < 16 && count > 0) { 
+            else if (count > 0 && count < UI_CONFIG.RESULTS_SHOW_BOTTOM_INQ) { 
                 if (resultsArea) resultsArea.classList.remove('hidden'); 
                 if (bottomInqContainer) bottomInqContainer.classList.remove('hidden');
                 renderResults(); 
             }
-            else if (filterCount >= 4) {
+            else if (filterCount >= UI_CONFIG.MIN_FILTERS_TO_SHOW_BTN) {
                 if (showBtn) showBtn.classList.remove('hidden');
             }
         }
@@ -1137,19 +1312,6 @@
             return 'var(--text-muted)';
         }
 
-        /* === #3 CountUp 動畫 === */
-        function animateCountUp(el, target, duration = 1200) {
-            let start = 0; const startTime = performance.now();
-            function step(now) {
-                const elapsed = now - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
-                el.textContent = Math.round(start + (target - start) * eased);
-                if (progress < 1) requestAnimationFrame(step);
-            }
-            requestAnimationFrame(step);
-        }
-
         function renderResults() {
             const container = document.getElementById('results-area');
             if (!container) return;
@@ -1165,41 +1327,21 @@
                             <i data-lucide="mail-plus" class="w-5 h-5"></i> <span>${lang.inquiry_btn_empty}</span>
                         </button>
                     </div>`;
-                lucide.createIcons();
+                lucide.createIcons({ root: container }); // Task 5: 僅在容器內更新圖示
                 return;
             }
+
+            const fragment = document.createDocumentFragment();
 
             filteredData.forEach(item => {
                 const card = document.createElement('div');
                 const isHighCP = item.Price_Positioning === 'V';
-                const ffColor = getFormFactorColor(item.Form_Factor);
-                /* #5 Form Factor 左邊框色條 */
-                card.className = `relative p-6 flex flex-col h-full overflow-hidden t-card ff-border ${isHighCP ? 'border-2' : ''}`;
-                card.style.borderLeftColor = ffColor;
+                card.className = `relative p-6 flex flex-col h-full overflow-hidden t-card ${isHighCP ? 'border-2' : ''}`;
                 if(isHighCP) card.style.borderColor = 'var(--accent)';
-                if(isHighCP) card.style.borderLeftColor = ffColor;
                 
                 let ribbonHTML = isHighCP ? `<div class="absolute top-0 right-0"><div class="t-badge-cp text-[10px] font-black px-4 py-1.5 rounded-bl-xl shadow-md flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="award" class="w-3.5 h-3.5"></i> ${lang.cp_badge}</div></div>` : '';
                 const badgeClass = getEfficiencyBadgeClass(item.Efficiency_Level);
-
-                /* === #13 同系列推薦 === */
-                let seriesPrefix = (item.Model_Name || '').replace(/\d{3,5}\s*W?$/i, '').trim();
-                let siblingWattages = [];
-                if (seriesPrefix.length > 2) {
-                    siblingWattages = [...new Set(
-                        allData
-                            .filter(d => d.Model_Name && d.Model_Name !== item.Model_Name && d.Model_Name.startsWith(seriesPrefix))
-                            .map(d => d.Wattage_W)
-                            .filter(w => w && w !== item.Wattage_W)
-                    )].sort((a,b) => parseInt(a) - parseInt(b)).slice(0, 4);
-                }
-                let seriesHTML = '';
-                if (siblingWattages.length > 0) {
-                    const siblingBtns = siblingWattages.map(w =>
-                        `<button class="px-2 py-0.5 text-[11px] font-bold t-btn-avail border rounded transition-all hover:border-current" onclick="event.stopPropagation(); selectedFilters['Wattage_W']='${w}'; selectedWattageRange=null; expandedCategories.add('Wattage_W'); updateLogic(); renderFilterUI();">${w}W</button>`
-                    ).join('');
-                    seriesHTML = `<div class="mt-3 pt-3 border-t t-border-base"><div class="text-[11px] t-text-muted font-bold mb-1.5">${currentLang === 'tw' ? '同系列也有 →' : 'Also available →'}</div><div class="flex flex-wrap gap-1.5">${siblingBtns}</div></div>`;
-                }
+                const ffColor = getFormFactorColor(item.Form_Factor);
 
                 card.innerHTML = `
                     ${ribbonHTML}
@@ -1215,7 +1357,7 @@
                     
                     <div class="flex items-center justify-between mb-6 pb-6 border-b t-border-base">
                         <div class="flex items-baseline">
-                            <span class="text-5xl font-black t-text-main tracking-tighter" data-countup="${item.Wattage_W}">0</span>
+                            <span class="text-5xl font-black t-text-main tracking-tighter">${item.Wattage_W}</span>
                             <span class="t-accent font-bold text-xl ml-1">W</span>
                         </div>
                         <div class="text-right flex flex-col items-end">
@@ -1254,17 +1396,12 @@
                             <span class="t-text-main font-bold ml-1">${item.Dimension_2 || '-'} mm</span>
                         </div>
                     </div>
-                    ${seriesHTML}
                 `;
-                container.appendChild(card);
+                fragment.appendChild(card);
             });
-
-            /* #3 countUp 動畫觸發 */
-            container.querySelectorAll('[data-countup]').forEach(el => {
-                animateCountUp(el, parseInt(el.dataset.countup) || 0);
-            });
-
-            lucide.createIcons();
+            
+            container.appendChild(fragment);
+            lucide.createIcons({ root: container }); // Task 5: 僅在結果容器內渲染圖示
         }
     </script>
 </body>
