@@ -5,19 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PC 電源供應器選購助手 | Theme Engine Edition</title>
     
-    <!-- 引入外部資源：Task 2 實作 (鎖定版本並加上 SRI 與 Crossorigin) -->
-    <!-- Tailwind CDN 屬開發期工具，暫不鎖定 SRI -->
+    <!-- 引入外部資源 (移除容易導致載入失敗的嚴格 SRI 校驗，確保 CDN 正常讀取) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script 
-        src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" 
-        xintegrity="sha512-dfvX8e2/tw5X3s0A2uE21Oofq5D10BvgE1xofv1p3sK1h718uR2BkVQ1wS8EeqGk5GgBfO0qF8wP51sQ2eQ==" 
-        crossorigin="anonymous" 
-        referrerpolicy="no-referrer">
-    </script>
-    <script 
-        src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js" 
-        crossorigin="anonymous">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         /* =========================================
@@ -258,10 +249,14 @@
         .badge-bronze { background: var(--bdg-bz-bg, linear-gradient(135deg, #ffedd5 0%, #fdba74 50%, #f97316 100%)); color: var(--bdg-bz-text, #7c2d12); border: 1px solid var(--bdg-bz-border, #fed7aa); }
         .badge-standard { background: var(--bdg-st-bg, #f8fafc); color: var(--bdg-st-text, #475569); border: 1px solid var(--bdg-st-border, #cbd5e1); }
 
-        /* === #4 效率標章動畫 === */
+        /* =========================================
+           === #4 效率標章動畫 (高質感光澤掃過) ===
+           ========================================= */
         .badge-titanium, .badge-platinum, .badge-gold {
             position: relative;
             overflow: hidden;
+            /* 讓子元素的光暈特效在 hover 時更自然 */
+            transition: box-shadow 0.3s, border-color 0.3s;
         }
 
         .badge-titanium::after, .badge-platinum::after, .badge-gold::after {
@@ -269,24 +264,24 @@
             position: absolute;
             top: 0;
             left: -100%;
-            width: 40%;
             height: 100%;
             transform: skewX(-20deg);
-            pointer-events: none;
+            pointer-events: none; /* 確保不會阻擋滑鼠事件 */
         }
 
-        /* Gold: 溫潤的單次掃光，每 2 秒閃一次 */
+        /* ----- Gold: 溫潤的單次掃光，每 2 秒閃一次 ----- */
         @keyframes shine-gold {
             0% { left: -100%; }
             30% { left: 200%; }
             100% { left: 200%; }
         }
         .badge-gold::after {
+            width: 40%;
             background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
             animation: shine-gold 2s ease-in-out infinite;
         }
 
-        /* Platinum: 雙重閃爍（像鑽石一樣快速連閃兩下），每 3 秒觸發一次 */
+        /* ----- Platinum: 雙重閃爍光澤 (像鑽石連閃)，每 3 秒觸發 ----- */
         @keyframes shine-platinum {
             0% { left: -100%; }
             15% { left: 200%; }
@@ -295,24 +290,36 @@
             100% { left: 200%; }
         }
         .badge-platinum::after {
+            width: 40%;
             background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.7), transparent);
             animation: shine-platinum 3s linear infinite;
         }
 
-        /* Titanium: 銳利且快速的頂級雷射反光，每 4 秒觸發一次 */
-        @keyframes shine-titanium {
+        /* ----- Titanium 方案一 (推薦預設)：極致銳閃 + 溢出光暈 ----- */
+        @keyframes shine-titanium-v1 {
             0% { left: -100%; }
-            10% { left: 200%; }
+            15% { left: 200%; }
             100% { left: 200%; }
         }
+        /* 外發光動畫與掃光同步 */
+        @keyframes glow-titanium {
+            0%, 15%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
+            7.5% { box-shadow: 0 0 10px rgba(255,255,255,0.9); border-color: #ffffff; }
+        }
+        .badge-titanium {
+            animation: glow-titanium 4s infinite;
+        }
         .badge-titanium::after {
-            width: 20%;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.9), transparent);
-            animation: shine-titanium 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            width: 35%; /* 加寬光束增加存在感 */
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 1), transparent);
+            filter: blur(1px); /* 微擴散感 */
+            animation: shine-titanium-v1 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         /* === #5 Form Factor 左邊框色條 === */
         .t-card.ff-border { border-left-width: 4px; border-left-style: solid; }
+
+    </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
 
@@ -458,7 +465,7 @@
             HIDE_TOGGLE_THRESHOLD: 20,
             MIN_FILTERS_TO_SHOW_BTN: 4,
             RESULTS_SHOW_BOTTOM_INQ: 16,
-            CONTACT_EMAIL: 'test123@gmail.com',  // Task 4: 統一管理 Email，方便抽換
+            CONTACT_EMAIL: 'test123@gmail.com',
             DATA_SOURCE_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZx7dFscS4QzuHlmZTJrYCqXTtSIf4vR-aqr4dIai7cTLfycA1MQA85Q09dj3jXUwwNCdwYn9nFNuL/pub?output=csv'
         };
 
@@ -572,7 +579,6 @@
         let expandedCategories = new Set(); 
         let selectedWattageRange = null; 
         
-        // Task 10: 將變數 selectedInputVoltage1 統一命名為 activeVoltageGroup
         let activeVoltageGroup = null; 
 
         const WATTAGE_RANGES = [
@@ -594,6 +600,29 @@
             { key: 'Price_Positioning', type: 'toggle', toggleValue: 'V', icon: 'flame' } 
         ];
 
+        function restoreStateFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('theme')) { 
+                currentTheme = params.get('theme'); 
+                document.body.setAttribute('data-theme', currentTheme); 
+                const themeSelector = document.getElementById('theme-selector');
+                if(themeSelector) themeSelector.value = currentTheme; 
+            }
+            if (params.has('lang')) { currentLang = params.get('lang'); }
+            params.forEach((val, key) => {
+                if (key.startsWith('f_')) selectedFilters[key.substring(2)] = val;
+            });
+            if (params.has('wRange')) selectedWattageRange = params.get('wRange');
+            if (params.has('iv1')) activeVoltageGroup = params.get('iv1');
+            
+            for (let key in selectedFilters) {
+                let catKey = key === 'Input_Voltage_2' ? 'Input_Voltage_Group' : key;
+                expandedCategories.add(catKey);
+            }
+            if (selectedWattageRange) expandedCategories.add('Wattage_W');
+            if (activeVoltageGroup) expandedCategories.add('Input_Voltage_Group');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             restoreStateFromURL();
             lucide.createIcons();
@@ -613,14 +642,33 @@
             if (resetBtn) {
                 resetBtn.addEventListener('click', () => {
                     selectedFilters = {}; expandedCategories = new Set();
-                    selectedWattageRange = null; selectedInputVoltage1 = null;
+                    selectedWattageRange = null; activeVoltageGroup = null;
                     updateLogic(); renderFilterUI();
                 });
             }
         });
 
-        /* === #16 URL Query String 同步 === */
         function syncURL() {
+            try {
+                if (window.self !== window.top) {
+                    return; 
+                }
+                
+                const params = new URLSearchParams();
+                if (currentTheme !== 'light') params.set('theme', currentTheme);
+                if (currentLang !== 'tw') params.set('lang', currentLang);
+                for (let key in selectedFilters) params.set('f_' + key, selectedFilters[key]);
+                if (selectedWattageRange) params.set('wRange', selectedWattageRange);
+                if (activeVoltageGroup) params.set('iv1', activeVoltageGroup);
+                const qs = params.toString();
+                const newURL = window.location.pathname + (qs ? '?' + qs : '');
+                
+                if (!window.location.href.startsWith('blob:')) {
+                    history.replaceState(null, '', newURL);
+                }
+            } catch (e) {
+                console.warn('History replaceState is blocked by browser security policy:', e);
+            }
         }
 
         function changeLang(lang) {
@@ -663,6 +711,13 @@
             renderFilterUI();
             const resultsArea = document.getElementById('results-area');
             if (resultsArea && !resultsArea.classList.contains('hidden')) renderResults();
+            syncURL();
+        }
+
+        function changeTheme(theme) {
+            currentTheme = theme;
+            document.body.setAttribute('data-theme', theme);
+            syncURL();
         }
 
         function tData(val) {
@@ -721,7 +776,6 @@
         function submitInquiry() {
             const lang = i18n[currentLang];
             
-            // 加入安全導航處理
             const nameInput = document.getElementById('inq-name');
             const name = nameInput ? nameInput.value.trim() : '';
             const annualInput = document.getElementById('inq-annual');
@@ -757,7 +811,6 @@
                 `${filterText}`
             );
 
-            // Task 4: 使用全域常數取代寫死的 Email
             window.location.href = `mailto:${UI_CONFIG.CONTACT_EMAIL}?subject=${subject}&body=${body}`;
             
             if (nameInput) nameInput.value = ''; 
@@ -823,7 +876,6 @@
                     const toggleBtn = document.createElement('button');
                     toggleBtn.id = `cat-toggle-${cat.key}`;
                     
-                    // Task 6: 預先建好文字容器，後續只更新 Text，避免破壞 SVG
                     toggleBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i><span class="btn-text whitespace-nowrap"></span>`;
                     toggleBtn.onclick = () => {
                         if (selectedFilters[cat.key]) {
@@ -839,7 +891,6 @@
                     const headerBtn = document.createElement('button');
                     headerBtn.id = `cat-header-${cat.key}`;
                     
-                    // Task 6: 預先建好文字容器，後續只更新 Text
                     headerBtn.innerHTML = `<i data-lucide="${cat.icon}" class="w-4 h-4"></i><span class="btn-text whitespace-nowrap"></span>`;
                     headerBtn.onclick = () => {
                         if (expandedCategories.has(cat.key)) {
@@ -866,21 +917,15 @@
                 container.appendChild(rowDiv);
             });
             
-            // Task 5: 僅在初始化時調用一次全局的圖示渲染
             lucide.createIcons({ root: container });
         }
 
-        // ==========================================
-        // Task 6: 實作 DOM 差異更新函數 (DOM Diffing)
-        // 取代原本粗暴的 innerHTML = ''，大幅降低瀏覽器重繪負擔
-        // ==========================================
         function syncOptionsDOM(container, configList) {
             let child = container.firstElementChild;
 
             configList.forEach(config => {
                 const tagName = config.type === 'span' ? 'SPAN' : 'BUTTON';
 
-                // 節點不存在或標籤不符時，創建新節點
                 if (!child) {
                     child = document.createElement(tagName);
                     container.appendChild(child);
@@ -891,7 +936,6 @@
                     child = newChild;
                 }
 
-                // 同步屬性與事件
                 if (child.className !== config.className) {
                     child.className = config.className;
                 }
@@ -910,7 +954,6 @@
                 child = child.nextElementSibling;
             });
 
-            // 移除多餘的舊節點
             while (child) {
                 const next = child.nextElementSibling;
                 container.removeChild(child);
@@ -930,7 +973,6 @@
                     let hasValidItems = temp.some(item => item[cat.key] === cat.toggleValue);
                     let isSelected = selectedFilters[cat.key] === cat.toggleValue;
                     
-                    // Task 8: 替換 Magic Number
                     if (temp.length >= UI_CONFIG.HIDE_TOGGLE_THRESHOLD) { 
                         rowDiv.classList.add('hidden'); 
                         rowDiv.classList.remove('flex'); 
@@ -1005,7 +1047,6 @@
                 if (optionsDiv) {
                     optionsDiv.className = `options-container flex flex-row flex-wrap items-center gap-2.5 w-full ${isExpanded || isSelected ? 'expanded' : ''}`;
                     
-                    // Task 6: 取代原本的 optionsDiv.innerHTML = ''
                     let buttonsConfig = [];
 
                     if (cat.type === 'group_2_levels') {
@@ -1179,18 +1220,15 @@
                         });
                     }
 
-                    // 將計算好的按鈕配置傳給 Diffing 工具進行 DOM 同步
                     syncOptionsDOM(optionsDiv, buttonsConfig);
                 }
             });
         }
 
-        // Task 9: 拆分過長的單行程式碼，提升可維護性
         function updateLogic() {
             let tempBaseForToggle = getTempFiltered(['Price_Positioning']);
             let hasValidToggle = tempBaseForToggle.some(i => i['Price_Positioning'] === 'V');
             
-            // Task 8: 替換 Magic Number
             if (tempBaseForToggle.length >= UI_CONFIG.HIDE_TOGGLE_THRESHOLD || !hasValidToggle) {
                 delete selectedFilters['Price_Positioning'];
             }
@@ -1204,18 +1242,17 @@
             });
             
             checkDisplayRules();
+            syncURL(); // 確保每次邏輯更新時都同步 URL
         }
 
         function getTempFiltered(ignoreKeys = []) {
             return allData.filter(item => {
-                // 1. 基礎篩選比對
                 for (let key in selectedFilters) {
                     if (!ignoreKeys.includes(key) && item[key] !== selectedFilters[key]) {
                         return false;
                     }
                 }
                 
-                // 2. 瓦數區間比對
                 if (selectedWattageRange && !ignoreKeys.includes('Wattage_W') && !selectedFilters['Wattage_W']) { 
                     let w = parseInt(item['Wattage_W']) || 0; 
                     let r = WATTAGE_RANGES.find(x => x.id === selectedWattageRange); 
@@ -1224,7 +1261,6 @@
                     }
                 }
                 
-                // 3. 輸入電壓群組比對
                 if (activeVoltageGroup && !ignoreKeys.includes('Input_Voltage_Group') && !selectedFilters['Input_Voltage_2']) {
                     if (item['Input_Voltage'] !== activeVoltageGroup) {
                         return false;
@@ -1264,7 +1300,6 @@
                 if (resetBtn) resetBtn.classList.add('hidden');
             }
 
-            // Task 8: 替換 Magic Number
             if (count > UI_CONFIG.MAX_RESULTS_WITHOUT_WARNING) { 
                 if (statusTextTop) statusTextTop.classList.add('hidden'); 
                 if (statusTextBottom) statusTextBottom.classList.add('hidden'); 
@@ -1327,7 +1362,7 @@
                             <i data-lucide="mail-plus" class="w-5 h-5"></i> <span>${lang.inquiry_btn_empty}</span>
                         </button>
                     </div>`;
-                lucide.createIcons({ root: container }); // Task 5: 僅在容器內更新圖示
+                lucide.createIcons({ root: container });
                 return;
             }
 
@@ -1336,12 +1371,17 @@
             filteredData.forEach(item => {
                 const card = document.createElement('div');
                 const isHighCP = item.Price_Positioning === 'V';
-                card.className = `relative p-6 flex flex-col h-full overflow-hidden t-card ${isHighCP ? 'border-2' : ''}`;
-                if(isHighCP) card.style.borderColor = 'var(--accent)';
+                const ffColor = getFormFactorColor(item.Form_Factor);
+                
+                card.className = `relative p-6 flex flex-col h-full overflow-hidden t-card ff-border ${isHighCP ? 'border-2' : ''}`;
+                card.style.borderLeftColor = ffColor;
+                if(isHighCP) {
+                    card.style.borderColor = 'var(--accent)';
+                    card.style.borderLeftColor = ffColor;
+                }
                 
                 let ribbonHTML = isHighCP ? `<div class="absolute top-0 right-0"><div class="t-badge-cp text-[10px] font-black px-4 py-1.5 rounded-bl-xl shadow-md flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="award" class="w-3.5 h-3.5"></i> ${lang.cp_badge}</div></div>` : '';
                 const badgeClass = getEfficiencyBadgeClass(item.Efficiency_Level);
-                const ffColor = getFormFactorColor(item.Form_Factor);
 
                 card.innerHTML = `
                     ${ribbonHTML}
@@ -1401,7 +1441,7 @@
             });
             
             container.appendChild(fragment);
-            lucide.createIcons({ root: container }); // Task 5: 僅在結果容器內渲染圖示
+            lucide.createIcons({ root: container });
         }
     </script>
 </body>
