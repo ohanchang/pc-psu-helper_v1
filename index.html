@@ -283,14 +283,45 @@
         .badge-bronze { background: var(--bdg-bz-bg, linear-gradient(135deg, #ffedd5 0%, #fdba74 50%, #f97316 100%)); color: var(--bdg-bz-text, #7c2d12); border: 1px solid var(--bdg-bz-border, #fed7aa); }
         .badge-standard { background: var(--bdg-st-bg, #f8fafc); color: var(--bdg-st-text, #475569); border: 1px solid var(--bdg-st-border, #cbd5e1); }
 
-        /* === #4 效率標章 shimmer 光澤動畫 === */
+        /* === #4 效率標章動畫 === */
+
+        /* Platinum: Shimmer 光澤掃過 */
         @keyframes shimmer {
             0% { background-position: -200% center; }
             100% { background-position: 200% center; }
         }
-        .badge-titanium, .badge-platinum {
+        .badge-platinum {
             background-size: 200% 100%;
             animation: shimmer 3s ease-in-out infinite;
+        }
+
+        /* Titanium: Border Trace 邊框跑光 */
+        .badge-titanium {
+            position: relative;
+            overflow: hidden;
+        }
+        .badge-titanium::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: conic-gradient(from 0deg, transparent 0%, transparent 70%, rgba(255,255,255,0.8) 78%, transparent 86%, transparent 100%);
+            animation: border-trace 2.5s linear infinite;
+            border-radius: inherit;
+            z-index: -1;
+        }
+        @keyframes border-trace {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Gold: Metallic Flip 金屬翻轉 */
+        @keyframes metallic-flip {
+            0%, 100% { transform: perspective(400px) rotateY(0deg); }
+            50% { transform: perspective(400px) rotateY(8deg); }
+        }
+        .badge-gold {
+            animation: metallic-flip 3s ease-in-out infinite;
+            transform-style: preserve-3d;
         }
 
         /* === #5 Form Factor 左邊框色條 === */
@@ -1107,7 +1138,7 @@
         }
 
         /* === #3 CountUp 動畫 === */
-        function animateCountUp(el, target, duration = 600) {
+        function animateCountUp(el, target, duration = 1200) {
             let start = 0; const startTime = performance.now();
             function step(now) {
                 const elapsed = now - startTime;
